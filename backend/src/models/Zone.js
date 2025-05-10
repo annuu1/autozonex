@@ -45,13 +45,6 @@ const ZoneSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  technicals: {
-    rsi: Number,
-    ema20: Number,
-    ema50: Number,
-    ema200: Number,
-    stochastic: { k: Number, d: Number },
-  },
   createdAt: {
     type: Date,
     default: Date.now,

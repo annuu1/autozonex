@@ -2,43 +2,49 @@ const yahooFinance = require('yahoo-finance2').default;
 const Zone = require('../models/Zone');
 const winston = require('winston');
 
-// Utility functions for technical indicators
-const calculateRSI = (closes, period = 14) => {
-  if (closes.length < period + 1) return null;
-  
-  let gains = 0, losses = 0;
-  for (let i = 1; i <= period; i++) {
-    const diff = closes[i] - closes[i - 1];
-    if (diff >= 0) gains += diff;
-    else losses -= diff;
+// Retry utility for API calls
+const retry = async (fn, retries = 3, delay = 1000) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
   }
-  
-  const avgGain = gains / period;
-  const avgLoss = losses / period;
-  const rs = avgGain / (avgLoss || 1); // Avoid division by zero
-  return 100 - (100 / (1 + rs));
 };
 
-const calculateEMA = (closes, period) => {
-  if (closes.length < period) return null;
-  
-  const k = 2 / (period + 1);
-  let ema = closes[0]; // Start with first close
-  for (let i = 1; i < closes.length; i++) {
-    ema = closes[i] * k + ema * (1 - k);
-  }
-  return ema;
+// Check zone freshness
+const getFreshness = async (ticker, timeFrame, proximalLine, distalLine) => {
+  const tests = await Zone.countDocuments({
+    ticker,
+    timeFrame,
+    proximalLine: { $gte: distalLine, $lte: proximalLine },
+    createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
+  });
+
+  if (tests === 0) return 3; // Untested
+  if (tests === 1) return 1.5; // Tested once
+  return 0; // Tested twice or more
 };
 
 // Main function to identify demand zones
 const identifyDemandZones = async (ticker, timeFrame = '1d') => {
   try {
-    // Fetch historical data (1 year, adjustable)
-    const candles = await yahooFinance.historical(ticker, {
-      period1: '1y',
-      interval: timeFrame,
-    });
-    
+    // Calculate date range (1 year ago to now)
+    const period2 = new Date(); // Current date
+    const period1 = new Date(period2);
+    period1.setFullYear(period2.getFullYear() - 1); // 1 year ago
+
+    // Fetch historical data
+    const candles = await retry(() =>
+      yahooFinance.historical(ticker, {
+        period1,
+        period2,
+        interval: timeFrame,
+      })
+    );
+
     if (!candles || candles.length < 10) {
       throw new Error(`Insufficient data for ${ticker}`);
     }
@@ -84,19 +90,8 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
             const timeAtBase = baseCount <= 3 ? 2 : baseCount <= 5 ? 1 : 0;
             const tradeScore = freshness + strength + timeAtBase;
 
-            // Calculate technical indicators
-            const closes = candles.slice(0, i + 1).map(c => c.close);
-            const rsi = calculateRSI(closes);
-            const ema20 = calculateEMA(closes, 20);
-            const ema50 = calculateEMA(closes, 50);
-            const ema200 = calculateEMA(closes, 200);
-
-            // Validate zone
-            const isValid =
-              tradeScore >= 4 && // Minimum score
-              (rsi < 30 || (legOut.close >= ema50 && rsi > 30)); // RSI oversold or EMA support
-
-            if (isValid) {
+            // Store zone if trade score is sufficient
+            if (tradeScore >= 4) {
               const zone = {
                 ticker,
                 timeFrame,
@@ -108,13 +103,6 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
                 freshness,
                 strength,
                 timeAtBase,
-                technicals: {
-                  rsi,
-                  ema20,
-                  ema50,
-                  ema200,
-                  stochastic: { k: null, d: null }, // Placeholder for future implementation
-                },
               };
 
               zones.push(zone);
@@ -136,23 +124,8 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
     return zones;
   } catch (err) {
     winston.error(`Error identifying demand zones for ${ticker}: ${err.message}`);
-  
     throw err;
   }
-};
-
-// Check zone freshness (untested, tested once, or twice)
-const getFreshness = async (ticker, timeFrame, proximalLine, distalLine) => {
-  const tests = await Zone.countDocuments({
-    ticker,
-    timeFrame,
-    proximalLine: { $gte: distalLine, $lte: proximalLine },
-    createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
-  });
-
-  if (tests === 0) return 3; // Untested
-  if (tests === 1) return 1.5; // Tested once
-  return 0; // Tested twice or more
 };
 
 module.exports = { identifyDemandZones };

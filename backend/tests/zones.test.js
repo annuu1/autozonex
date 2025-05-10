@@ -15,6 +15,7 @@ describe('Zones API', () => {
       expect(res.body[0]).toHaveProperty('ticker', 'RELIANCE.NS');
       expect(res.body[0]).toHaveProperty('type', 'demand');
       expect(res.body[0]).toHaveProperty('tradeScore');
+      expect(res.body[0]).toHaveProperty('pattern', expect.anyOf('DBR', 'RBR'));
     }
   });
 

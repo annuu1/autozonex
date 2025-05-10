@@ -6,7 +6,6 @@ const ChartContainer = styled.div;
 
 const StockChart = ({ data }) => {
   return (
-    <ChartContainer>
       <LineChart width={600} height={300} data={data}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" />
@@ -14,7 +13,6 @@ const StockChart = ({ data }) => {
         <Tooltip />
         <Line type="monotone" dataKey="close" stroke="#8884d8" />
       </LineChart>
-    </ChartContainer>
   );
 };
 

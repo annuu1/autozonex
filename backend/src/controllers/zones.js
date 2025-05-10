@@ -4,11 +4,16 @@ const Zone = require('../models/Zone');
 const getDemandZones = async (req, res) => {
   try {
     const { ticker } = req.params;
-    const timeFrame = req.params.timeFrame || '1d'; // Default to '1d' if not provided
+    const timeFrame = req.params.timeFrame || '1d'; // Default to '1d'
 
     // Validate timeFrame
-    if (!['1d', '1w', '1mo'].includes(timeFrame)) {
-      return res.status(400).json({ message: 'Invalid timeFrame. Use 1d, 1w, or 1mo.' });
+    if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
+      return res.status(400).json({ message: 'Invalid timeFrame. Use 1d, 1wk, or 1mo.' });
+    }
+
+    // Validate ticker (basic check for NSE/BSE format)
+    if (!ticker.match(/^[A-Z0-9]+\.(NS|BO)$/)) {
+      return res.status(400).json({ message: 'Invalid ticker format. Use NSE/BSE ticker (e.g., RELIANCE.NS)' });
     }
 
     // Check for cached zones (last 24 hours)

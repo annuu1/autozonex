@@ -9,7 +9,7 @@ const ZoneSchema = new mongoose.Schema({
   timeFrame: {
     type: String,
     required: true,
-    enum: ['1d', '1w', '1mo'], // Daily, weekly, monthly
+    enum: ['1d', '1wk', '1mo'], // Updated to '1wk'
   },
   type: {
     type: String,
@@ -44,6 +44,10 @@ const ZoneSchema = new mongoose.Schema({
   timeAtBase: {
     type: Number,
     required: true,
+  },
+  legOutDate: {
+    type: Date,
+    required: true, // New field for leg-out candle date
   },
   createdAt: {
     type: Date,

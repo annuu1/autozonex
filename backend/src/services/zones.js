@@ -31,6 +31,11 @@ const getFreshness = async (ticker, timeFrame, proximalLine, distalLine) => {
 // Main function to identify demand zones
 const identifyDemandZones = async (ticker, timeFrame = '1d') => {
   try {
+    // Validate timeFrame
+    if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
+      throw new Error('Invalid timeFrame. Use 1d, 1wk, or 1mo.');
+    }
+
     // Calculate date range (1 year ago to now)
     const period2 = new Date(); // Current date
     const period1 = new Date(period2);
@@ -103,6 +108,7 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
                 freshness,
                 strength,
                 timeAtBase,
+                legOutDate: new Date(legOut.date), // Add leg-out candle date
               };
 
               zones.push(zone);

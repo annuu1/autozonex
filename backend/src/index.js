@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const winston = require('winston');
-const connectDB = require('./src/utils/db');
+const connectDB = require('./utils/db');
 
 dotenv.config();
 
@@ -36,9 +36,9 @@ app.use((req, res, next) => {
 });
 
 // Routes
-app.use('/api/stocks', require('./src/routes/stocks'));
-// app.use('/api/users', require('./src/routes/users'));
-// app.use('/api/watchlist', require('./src/routes/watchlist'));
+app.use('/api/stocks', require('./routes/stocks'));
+// app.use('/api/users', require('./routes/users'));
+// app.use('/api/watchlist', require('./routes/watchlist'));
 
 // Error handling
 app.use((err, req, res, next) => {

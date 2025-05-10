@@ -1,6 +1,7 @@
 const request = require('supertest');
 const app = require('../src/index');
-const Zone = require('../models/Zone');
+const mongoose = require('mongoose');
+const Zone = require('../src/models/Zone');
 
 describe('Zones API', () => {
   beforeAll(async () => {

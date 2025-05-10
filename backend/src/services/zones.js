@@ -55,47 +55,59 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
     }
 
     const zones = [];
-    let baseCount = 0;
-    let baseCandles = [];
+    let i = 0;
 
-    for (let i = 2; i < candles.length; i++) {
-      const legIn = candles[i - 2];
-      const current = candles[i - 1];
-      const legOut = candles[i];
+    while (i < candles.length) {
+      // Step 1: Find leg-in candle (body > 50% of range)
+      const currentCandle = candles[i];
+      const body = Math.abs(currentCandle.close - currentCandle.open);
+      const range = currentCandle.high - currentCandle.low;
+      const isLegIn = body / range > 0.5;
 
-      // Calculate candle properties
-      const currentBody = Math.abs(current.close - current.open);
-      const currentRange = current.high - current.low;
-      const isBaseCandle = currentBody / currentRange < 0.5;
+      if (isLegIn) {
+        const legIn = currentCandle;
+        let baseCandles = [];
+        let baseCount = 0;
+        let j = i + 1;
 
-      if (isBaseCandle) {
-        baseCount++;
-        baseCandles.push(current);
-      } else {
-        if (baseCount >= 1 && baseCount <= 5) {
-          // Check for DBR or RBR
-          const isDBR =
-            legIn.close < legIn.open && // Red leg-in
-            legOut.close > legOut.open && // Green leg-out
-            legOut.close > legIn.high; // Closes above leg-in high
+        // Step 2: Find up to 5 base candles (body < 50% of range)
+        while (j < candles.length && baseCount < 5) {
+          const nextCandle = candles[j];
+          const nextBody = Math.abs(nextCandle.close - nextCandle.open);
+          const nextRange = nextCandle.high - nextCandle.low;
+          const isBaseCandle = nextBody / nextRange < 0.5;
 
-          const isRBR =
-            legIn.close > legIn.open && // Green leg-in
-            legOut.close > legOut.open && // Green leg-out
-            legOut.close > legIn.high; // Closes above leg-in high
+          if (isBaseCandle) {
+            baseCandles.push(nextCandle);
+            baseCount++;
+            j++;
+          } else {
+            break; // Non-base candle found, stop collecting base candles
+          }
+        }
+
+        // Step 3: Check for leg-out candle (green, closes above leg-in high)
+        if (baseCount >= 1 && j < candles.length) {
+          const legOut = candles[j];
+          const isLegOutGreen = legOut.close > legOut.open;
+          const isLegOutValid = legOut.close > legIn.high;
+
+          // Step 4: Check for DBR or RBR pattern
+          const isDBR = legIn.close < legIn.open && isLegOutGreen && isLegOutValid; // Red leg-in
+          const isRBR = legIn.close > legIn.open && isLegOutGreen && isLegOutValid; // Green leg-in
 
           if (isDBR || isRBR) {
-            // Mark zone boundaries (body-to-wick method)
+            // Step 5: Mark zone boundaries (body-to-wick method)
             const proximalLine = Math.max(...baseCandles.map(c => Math.max(c.close, c.open)));
             const distalLine = Math.min(...baseCandles.map(c => c.low));
 
-            // Calculate trade score
+            // Step 6: Calculate trade score
             const freshness = await getFreshness(ticker, timeFrame, proximalLine, distalLine);
-            const strength = legOut.high - legOut.low > (current.high - current.low) * 2 ? 2 : 1;
+            const strength = (legOut.high - legOut.low) > (baseCandles[baseCandles.length - 1].high - baseCandles[baseCandles.length - 1].low) * 2 ? 2 : 1;
             const timeAtBase = baseCount <= 3 ? 2 : baseCount <= 5 ? 1 : 0;
             const tradeScore = freshness + strength + timeAtBase;
 
-            // Store zone if trade score is sufficient
+            // Step 7: Store zone if trade score is sufficient
             if (tradeScore >= 4) {
               const zone = {
                 ticker,
@@ -108,16 +120,17 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
                 freshness,
                 strength,
                 timeAtBase,
-                legOutDate: new Date(legOut.date), // Add leg-out candle date
+                legOutDate: new Date(legOut.date),
               };
-
               zones.push(zone);
             }
           }
         }
-        // Reset base count
-        baseCount = 0;
-        baseCandles = [];
+
+        // Move to the candle after the last base candle or leg-out
+        i = j;
+      } else {
+        i++; // Move to next candle if no leg-in found
       }
     }
 

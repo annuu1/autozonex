@@ -17,16 +17,16 @@ const getDemandZones = async (req, res) => {
     }
 
     // Check for cached zones (last 24 hours)
-    // const cachedZones = await Zone.find({
-    //   ticker,
-    //   timeFrame,
-    //   type: 'demand',
-    //   createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-    // });
+    const cachedZones = await Zone.find({
+      ticker,
+      timeFrame,
+      type: 'demand',
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
 
-    // if (cachedZones.length > 0) {
-    //   return res.json(cachedZones);
-    // }
+    if (cachedZones.length > 0) {
+      return res.json(cachedZones);
+    }
 
     // Identify new zones
     const zones = await identifyDemandZones(ticker, timeFrame);

@@ -1,35 +1,26 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Dashboard from './components/Dashboard';
 import StockChart from './components/StockChart';
+import StockCharting from './components/StockCharting';
 
 const App = () => {
-  const [ticker, setTicker] = useState('RELIANCE.NS');
-  const [timeFrame, setTimeFrame] = useState('1d');
-
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">GTF Trading Dashboard</h1>
-      <div className="mb-4">
-        <label className="mr-2">Ticker:</label>
-        <input
-          type="text"
-          value={ticker}
-          onChange={(e) => setTicker(e.target.value.toUpperCase())}
-          className="border p-2 mr-4"
-          placeholder="e.g., RELIANCE.NS"
-        />
-        <label className="mr-2">Time Frame:</label>
-        <select
-          value={timeFrame}
-          onChange={(e) => setTimeFrame(e.target.value)}
-          className="border p-2"
-        >
-          <option value="1d">Daily</option>
-          <option value="1wk">Weekly</option>
-          <option value="1mo">Monthly</option>
-        </select>
+    <Router>
+      <div className="flex min-h-screen">
+        <Sidebar />
+        <div className="flex-1 sm:ml-64 p-4 bg-gray-100">
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/chart" element={<StockCharting ticker="RELIANCE.NS" timeFrame="1d" />} />
+            <Route path="/watchlist" element={<div>Watchlist (TBD)</div>} />
+            <Route path="/settings" element={<div>Settings (TBD)</div>} />
+            <Route path="/" element={<Dashboard />} />
+          </Routes>
+        </div>
       </div>
-      <StockChart ticker={ticker} timeFrame={timeFrame} />
-    </div>
+    </Router>
   );
 };
 

@@ -1,4 +1,4 @@
-const { identifyDemandZones } = require('../services/zones');
+const { identifyDemandZones, identifyDailyDemandZones } = require('../services/zones');
 const Zone = require('../models/Zone');
 
 const getDemandZones = async (req, res) => {
@@ -59,4 +59,33 @@ const getAllDemandZones = async (req, res) => {
   }
 };
 
-module.exports = { getDemandZones, getAllDemandZones };
+const getDailyDemandZones = async (req, res) => {
+  try {
+    const { timeFrame = '1d', tickers } = req.query;
+    const tickerList = tickers ? tickers.split(',') : undefined;
+
+    // Validate timeFrame
+    if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
+      return res.status(400).json({ message: 'Invalid timeFrame. Use 1d, 1wk, or 1mo.' });
+    }
+
+    // Validate tickers if provided
+    if (tickerList) {
+      for (const ticker of tickerList) {
+        if (!ticker.match(/^[A-Z0-9]+\.(NS|BO)$/)) {
+          return res.status(400).json({ message: `Invalid ticker format: ${ticker}. Use NSE/BSE ticker (e.g., RELIANCE.NS)` });
+        }
+      }
+    }
+
+    const zones = await identifyDailyDemandZones(timeFrame, tickerList);
+    res.json({
+      total: zones.length,
+      data: zones,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { getDemandZones, getAllDemandZones, getDailyDemandZones };

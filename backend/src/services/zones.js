@@ -508,6 +508,7 @@ const NSE_TICKERS = [
   "NETWORK18.NS"
 ];
 
+// const NSE_TICKERS = ['RELIANCE.NS']
 
 // Retry utility for API calls
 const retry = async (fn, retries = 3, delay = 1000) => {
@@ -760,7 +761,9 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
             // Check leg-out condition
             const isLegOutGreen = currentCandle.close > currentCandle.open;
             const priorHigh = Math.max(...candles.slice(Math.max(j - 3, 0), j).map(c => c.high));
-            const isLegOutValid = isLegOutGreen && currentCandle.close > priorHigh;
+            const range = currentCandle.high - currentCandle.low;
+            const bodyPct = Math.abs(currentCandle.close - currentCandle.open) / range*100;
+            const isLegOutValid = isLegOutGreen && currentCandle.close > priorHigh && bodyPct > 50;
       
             logger.info(`🟢 Checking Leg-Out for ${ticker} on ${currentCandle.date}: Close=${currentCandle.close}, Open=${currentCandle.open}, PriorHigh=${priorHigh}, isGreen=${isLegOutGreen}, isValid=${isLegOutValid}`);
       

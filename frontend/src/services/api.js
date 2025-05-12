@@ -20,10 +20,10 @@ export const fetchZones = async (ticker, timeFrame) => {
   }
 };
 
-export const fetchAllZones = async (ticker, timeFrame) => {
+export const fetchAllZones = async (page, limit, timeFrame='all') => {
   try {
     const response = await axios.get(`${API_BASE_URL}/zones/allZones`, {
-      params: { ticker, timeFrame }
+      params: { page,limit, timeFrame }
     });
     return response.data;
   } catch (error) {

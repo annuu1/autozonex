@@ -15,17 +15,63 @@ const retry = async (fn, retries = 3, delay = 1000) => {
 };
 
 // Check zone freshness
-const getFreshness = async (ticker, timeFrame, proximalLine, distalLine) => {
-  const tests = await Zone.countDocuments({
-    ticker,
-    timeFrame,
-    proximalLine: { $gte: distalLine, $lte: proximalLine },
-    createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }, // Last 30 days
-  });
+const getFreshness = async (ticker, timeFrame, proximalLine, distalLine, legOutDate) => {
+  try {
+    // Fetch candles from legOutDate to present
+    const period1 = new Date(legOutDate);
+    const period2 = new Date();
+    const candles = await retry(() =>
+      yahooFinance.historical(ticker, {
+        period1,
+        period2,
+        interval: timeFrame,
+      })
+    );
 
-  if (tests === 0) return 3; // Untested
-  if (tests === 1) return 1.5; // Tested once
-  return 0; // Tested twice or more
+    if (!candles || candles.length < 1) {
+      winston.warn(`No candles found for freshness check: ${ticker} (${timeFrame})`);
+      return 3; // No data, assume fresh
+    }
+
+    let approachCount = 0;
+    let isBreached = false;
+
+    // Check each candle for approach or breach
+    for (const candle of candles) {
+      // Skip the leg-out candle itself
+      if (new Date(candle.date).toISOString() === new Date(legOutDate).toISOString()) {
+        continue;
+      }
+
+      // Approach: Price enters the zone (low <= proximalLine && high >= distalLine)
+      if (candle.low <= proximalLine && candle.high >= distalLine) {
+        approachCount++;
+        winston.info(`Price approached zone: ${ticker} (${timeFrame}), Date: ${candle.date}, Low: ${candle.low}, High: ${candle.high}`);
+      }
+
+      // Breach: Price closes below distalLine (demand zone)
+      if (candle.close < distalLine) {
+        isBreached = true;
+        winston.info(`Zone breached: ${ticker} (${timeFrame}), Date: ${candle.date}, Close: ${candle.close}, Distal: ${distalLine}`);
+        break; // No need to check further
+      }
+    }
+
+    // Assign freshness score
+    if (isBreached) {
+      return 0; // Breached, not fresh
+    }
+    if (approachCount === 0) {
+      return 3; // No approaches, fresh
+    }
+    if (approachCount <= 2) {
+      return 1.5; // Approached 1-2 times
+    }
+    return 0; // Approached 3+ times, not fresh
+  } catch (err) {
+    winston.error(`Error checking freshness for ${ticker} (${timeFrame}): ${err.message}`);
+    return 3; // Default to fresh on error to avoid blocking
+  }
 };
 
 // Main function to identify demand zones
@@ -102,7 +148,7 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
             const distalLine = Math.min(...baseCandles.map(c => c.low));
 
             // Step 6: Calculate trade score
-            const freshness = await getFreshness(ticker, timeFrame, proximalLine, distalLine);
+            const freshness = await getFreshness(ticker, timeFrame, proximalLine, distalLine, legOut.date);
             const strength = (legOut.high - legOut.low) > (baseCandles[baseCandles.length - 1].high - baseCandles[baseCandles.length - 1].low) * 2 ? 2 : 1;
             const timeAtBase = baseCount <= 3 ? 2 : baseCount <= 5 ? 1 : 0;
             const tradeScore = freshness + strength + timeAtBase;

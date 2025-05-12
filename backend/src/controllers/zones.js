@@ -35,5 +35,28 @@ const getDemandZones = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+const getAllDemandZones = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
-module.exports = { getDemandZones };
+    const skip = (page - 1) * limit;
+
+    const zones = await Zone.find({})
+      .skip(skip)
+      .limit(limit);
+
+    const totalZones = await Zone.countDocuments();
+
+    res.status(200).json({
+      total: totalZones,
+      page: page,
+      pages: Math.ceil(totalZones / limit),
+      data: zones
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { getDemandZones, getAllDemandZones };

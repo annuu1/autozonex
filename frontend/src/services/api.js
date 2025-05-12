@@ -19,3 +19,14 @@ export const fetchZones = async (ticker, timeFrame) => {
     throw new Error(error.response?.data?.error || 'Failed to fetch demand zones');
   }
 };
+
+export const fetchAllZones = async (ticker, timeFrame) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/zones/allZones`, {
+      params: { ticker, timeFrame }
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to fetch all demand zones');
+  }
+};

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getDemandZones } = require('../controllers/zones');
+const { getDemandZones, getAllDemandZones } = require('../controllers/zones');
 
-router.get('/:ticker/:timeFrame', getDemandZones); // Require timeFrame explicitly
+router.get('/:ticker/:timeFrame', getDemandZones);
+router.get('/allZones', getAllDemandZones)
 
 module.exports = router;

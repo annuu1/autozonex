@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { fetchZones, fetchCandles } from '../services/api';
 
-const StockChart = ({ ticker, timeFrame }) => {
+const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
@@ -56,7 +56,27 @@ const StockChart = ({ ticker, timeFrame }) => {
         candlestickSeries.setData(candles);
 
         // ✅ Fetch zones and draw them
-        const fetchedZones = await fetchZones(ticker, timeFrame);
+        if (selectedZone) {
+
+          candlestickSeries.createPriceLine({
+            price: selectedZone.proximalLine,
+            color: 'rgba(0, 150, 136, 0.5)',
+            lineWidth: 2,
+            lineStyle: 0,
+            axisLabelVisible: true,
+            title: `Zone Top (${selectedZone.pattern})`,
+          });
+          candlestickSeries.createPriceLine({
+            price: selectedZone.distalLine,
+            color: 'rgba(0, 150, 136, 0.5)',
+            lineWidth: 2,
+            lineStyle: 0,
+            axisLabelVisible: true,
+            title: `Zone Bottom (${selectedZone.pattern})`,
+          });
+          
+        }else{
+          const fetchedZones = await fetchZones(ticker, timeFrame);
         console.log('Fetched zones:', fetchedZones);
 
         fetchedZones.forEach(zone => {
@@ -77,6 +97,7 @@ const StockChart = ({ ticker, timeFrame }) => {
             title: `Zone Bottom (${zone.pattern})`,
           });
         });
+        }
 
         chart.timeScale().fitContent();
       } catch (error) {
@@ -91,12 +112,11 @@ const StockChart = ({ ticker, timeFrame }) => {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [ticker, timeFrame]);
+  }, [ticker, timeFrame, selectedZone]);
 
   return (
     <div className="relative w-full">
       <div ref={chartContainerRef} className="w-full h-[400px]" />
-      <div className="text-sm text-gray-500 mt-2">Chart powered by TradingView</div>
     </div>
   );
 };

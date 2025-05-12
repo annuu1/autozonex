@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import StockChart from './components/StockChart';
 import StockCharting from './components/StockCharting';
+import AllZones from './components/AllZones';
 
 const App = () => {
   return (
@@ -13,6 +14,7 @@ const App = () => {
         <div className="flex-1 sm:ml-64 p-4 bg-gray-100">
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/all-zones" element={<AllZones />} />
             <Route path="/chart" element={<StockCharting ticker="RELIANCE.NS" timeFrame="1d" />} />
             <Route path="/watchlist" element={<div>Watchlist (TBD)</div>} />
             <Route path="/settings" element={<div>Settings (TBD)</div>} />

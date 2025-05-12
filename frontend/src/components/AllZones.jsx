@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { fetchZones } from '../services/api';
+import { fetchAllZones } from '../services/api';
 import StockChart from './StockChart';
 
-const Dashboard = () => {
+const AllZones = () => {
   const [ticker, setTicker] = useState('RELIANCE.NS');
   const [timeFrame, setTimeFrame] = useState('1d');
   const [zones, setZones] = useState([]);
@@ -13,14 +13,20 @@ const Dashboard = () => {
   const [filterType, setFilterType] = useState('all');
   const [selectedZone, setSelectedZone] = useState(null);
 
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     const loadZones = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchZones(ticker, timeFrame);
+        const data = await fetchAllZones(page, limit);
         console.log('Fetched zones:', data);
-        setZones(data);
+        setZones(data.data);
+        setTotalPages(data.pages);
       } catch (err) {
         console.error('Error fetching zones:', err);
         setError(err.message || 'Failed to load zones');
@@ -30,9 +36,8 @@ const Dashboard = () => {
     };
 
     loadZones();
-  }, [ticker, timeFrame]);
+  }, [page, limit]);
 
-  // Sort and filter zones
   const sortedZones = [...zones]
     .filter(zone => filterType === 'all' || zone.type === filterType)
     .sort((a, b) => {
@@ -46,7 +51,6 @@ const Dashboard = () => {
       return 0;
     });
 
-  // Handle sorting
   const handleSort = key => {
     if (sortBy === key) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -60,45 +64,6 @@ const Dashboard = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">GTF Trading Dashboard</h1>
 
-      {/* Inputs */}
-      <div className="mb-4 flex flex-col sm:flex-row gap-4">
-        <div>
-          <label className="mr-2">Ticker:</label>
-          <input
-            type="text"
-            value={ticker}
-            onChange={e => setTicker(e.target.value.toUpperCase())}
-            className="border p-2 rounded"
-            placeholder="e.g., RELIANCE.NS"
-          />
-        </div>
-        <div>
-          <label className="mr-2">Time Frame:</label>
-          <select
-            value={timeFrame}
-            onChange={e => setTimeFrame(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="1d">Daily</option>
-            <option value="1wk">Weekly</option>
-            <option value="1mo">Monthly</option>
-          </select>
-        </div>
-        <div>
-          <label className="mr-2">Zone Type:</label>
-          <select
-            value={filterType}
-            onChange={e => setFilterType(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="all">All</option>
-            <option value="demand">Demand</option>
-            <option value="supply">Supply</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Loading/Error States */}
       {loading && (
         <div className="flex justify-center my-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -155,7 +120,26 @@ const Dashboard = () => {
         </table>
       </div>
 
-      {/* Chart for Selected Zone */}
+      {/* Pagination Controls */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button
+          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+          disabled={page === 1}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <span className="self-center">Page {page} of {totalPages}</span>
+        <button
+          onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+          disabled={page === totalPages}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Chart */}
       {selectedZone && (
         <div className="mt-8">
           <h2 className="text-xl font-bold mb-4">
@@ -168,4 +152,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AllZones;

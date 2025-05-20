@@ -39,7 +39,8 @@ app.use((req, res, next) => {
 app.use('/api/stocks', require('./routes/stocks'));
 app.use('/api/zones', require('./routes/zones'));
 app.use('/api/candles', require('./routes/candleRoutes'));
-// app.use('/api/users', require('./routes/users'));
+app.use('/api/users', require('./routes/usersRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 // app.use('/api/watchlist', require('./routes/watchlist'));
 
 // Error handling

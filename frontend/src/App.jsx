@@ -37,7 +37,7 @@ const App = () => {
           element={
             <MainLayout>
               <ProtectedRoute>
-              <Dashboard />
+                <Dashboard />
               </ProtectedRoute>
             </MainLayout>
           }
@@ -46,7 +46,9 @@ const App = () => {
           path="/dashboard"
           element={
             <MainLayout>
-              <Dashboard />
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
             </MainLayout>
           }
         />
@@ -54,7 +56,9 @@ const App = () => {
           path="/all-zones"
           element={
             <MainLayout>
-              <AllZones />
+              <ProtectedRoute>
+                <AllZones />
+              </ProtectedRoute>
             </MainLayout>
           }
         />
@@ -62,25 +66,31 @@ const App = () => {
           path="/chart"
           element={
             <MainLayout>
-              <StockCharting ticker="RELIANCE.NS" timeFrame="1d" />
+              <ProtectedRoute>
+                <StockCharting ticker="RELIANCE.NS" timeFrame="1d" />
+              </ProtectedRoute>
             </MainLayout>
           }
         />
         <Route
-        path='/watchlist'
-        element={
-          <MainLayout>
-            <h1>Watch list</h1>
-          </MainLayout>
-        }
+          path="/watchlist"
+          element={
+            <MainLayout>
+              <ProtectedRoute>
+                <h1>Watch list</h1>
+              </ProtectedRoute>
+            </MainLayout>
+          }
         />
         <Route
-        path='/settings'
-        element={
-          <MainLayout>
-            <h1>Profile settings</h1>
-          </MainLayout>
-        }
+          path="/settings"
+          element={
+            <MainLayout>
+              <ProtectedRoute>
+                <h1>Profile settings</h1>
+              </ProtectedRoute>
+            </MainLayout>
+          }
         />
       </Routes>
     </Router>

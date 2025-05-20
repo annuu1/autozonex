@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchZones } from '../services/api';
 import StockChart from './StockChart';
+import { formatNumber } from '../utils/formatNumber';
+import { formatDate } from '../utils/formatDate';
 
 const Dashboard = () => {
   const [ticker, setTicker] = useState('RELIANCE.NS');
@@ -137,10 +139,10 @@ const Dashboard = () => {
                 <td className="p-2 border">{zone.timeFrame}</td>
                 <td className="p-2 border">{zone.type}</td>
                 <td className="p-2 border">{zone.pattern}</td>
-                <td className="p-2 border">{zone.proximalLine}</td>
-                <td className="p-2 border">{zone.distalLine}</td>
+                <td className="p-2 border">{formatNumber(zone.proximalLine)}</td>
+                <td className="p-2 border">{formatNumber(zone.distalLine)}</td>
                 <td className="p-2 border">{zone.tradeScore}</td>
-                <td className="p-2 border">{zone.legOutDate}</td>
+                <td className="p-2 border">{formatDate(zone.legOutDate)}</td>
                 <td className="p-2 border">
                   <button
                     onClick={() => setSelectedZone(zone)}

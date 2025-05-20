@@ -7,6 +7,7 @@ import StockCharting from './components/StockCharting';
 import AllZones from './components/AllZones';
 import Signup from './pages/auth/signup';
 import Login from './pages/auth/login';
+import ProtectedRoute from './components/routes/ProtectedRoute';
 
 const App = () => {
   return (
@@ -35,7 +36,9 @@ const App = () => {
           path="/"
           element={
             <MainLayout>
+              <ProtectedRoute>
               <Dashboard />
+              </ProtectedRoute>
             </MainLayout>
           }
         />

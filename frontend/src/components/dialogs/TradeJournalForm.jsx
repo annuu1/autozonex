@@ -112,9 +112,10 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
       if (editId) {
         await updateTradeJournal(editId, payload);
       } else {
-        await createTradeJournal(payload);
+        if (onSuccess) {
+          await onSuccess(form);  // send form data up to parent
+        }
       }
-      if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
       setError(

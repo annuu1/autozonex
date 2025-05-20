@@ -53,9 +53,14 @@ const getCandles = async (req, res) => {
 
     res.status(200).json(formattedCandles);
   } catch (err) {
-    winston.error(`Error fetching candles for ${ticker}: ${err.message}`);
-    res.status(500).json({ error: err.message });
+    winston.error(`Error fetching candles for ${ticker}: ${err.message || err}`);
+  
+    const safeMessage = typeof err === 'string' ? err 
+                       : err?.message || 'Unknown error occurred';
+  
+    res.status(500).json({ error: safeMessage });
   }
+  
 };
 
 module.exports = { getCandles };

@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import StockCharting from './components/StockCharting';
 import AllZones from './components/AllZones';
 import Signup from './pages/auth/signup';
+import Login from './pages/auth/login';
 
 const App = () => {
   return (
@@ -17,6 +18,14 @@ const App = () => {
           element={
             <AuthLayout>
               <Signup />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthLayout>
+              <Login />
             </AuthLayout>
           }
         />

@@ -3,7 +3,6 @@ const TradeJournal = require('../models/TradeJournal');
 // Create a new trade journal entry
 exports.createTradeJournal = async (req, res) => {
   try {
-    console.log(req)
     req.body.userId = req.user._id;
     if(!req.body.strategy) {
       delete req.body.strategy;

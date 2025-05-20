@@ -14,7 +14,7 @@ const TradeJournalSchema = new mongoose.Schema({
   takeProfit: { type: Number },
   pnl: { type: Number },
   fees: { type: Number },
-  strategy: { type: String },
+  strategy: { type: mongoose.Schema.Types.ObjectId, ref: "Strategy" },
   tags: [String],
   
   setupScreenshotUrl: { type: String },
@@ -25,7 +25,7 @@ const TradeJournalSchema = new mongoose.Schema({
   broker: { type: String },
   market: { type: String },
   holdingPeriod: { type: String },
-  createdBy:{type: mongoose.Schema.Types.ObjectId, ref: "user", required: true}
+  createdBy:{type: mongoose.Schema.Types.ObjectId, ref: "User", required: true}
 }, {
   timestamps: true // This will add createdAt and updatedAt fields automatically
 });

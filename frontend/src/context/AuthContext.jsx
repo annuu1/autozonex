@@ -12,16 +12,18 @@ export const AuthProvider = ({children}) => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if(token) {
-            axios.get(`${import.meta.env.VITE_API_URL || ""}/api/auth/me`, {
+            axios.get(`${import.meta.env.VITE_API_URL || ""}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             })
             .then((res)=>{
-                setUser(res.data.user);
+                // console.log(res.data)
+                setUser(res.data);
                 setIsAuthenticated(true);
             })
-            .catch(()=>{
+            .catch((err)=>{
+                console.log(err)
                 localStorage.removeItem('token')
                 setIsAuthenticated(false)
             })

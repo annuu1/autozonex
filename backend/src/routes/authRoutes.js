@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // Signup route
 router.post('/signup', async (req, res) => {
@@ -131,9 +132,9 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // me route
-router.get('/me', async (req, res) => {
+router.get('/me',auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

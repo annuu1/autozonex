@@ -3,10 +3,16 @@ import { AuthContext } from "../../context/AuthContext";
 import {Navigate} from "react-router-dom";
 
 const ProtectedRoute = ({children})=>{
-    const isLoggedIn = useContext(AuthContext).isAuthenticated;
+    const { isAuthenticated, loading } = useContext(AuthContext);
     
-    if (!isLoggedIn){
-        return <Navigate to="/login" replace/>
+    console.log("isAuthenticated:", isAuthenticated, "loading:", loading);
+
+    if (loading) {
+        return <div>Loading...</div>; // Or a spinner/loading component
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" replace />;
     }
     return children;
 }

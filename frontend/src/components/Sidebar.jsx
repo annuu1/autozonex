@@ -70,6 +70,17 @@ const Sidebar = () => {
                   Settings
                 </NavLink>
               </li>
+              <li>
+                <NavLink
+                  to="/trade-journal"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Trade Journal
+                </NavLink>
+              </li>
             </ul>
           </nav>
         </div>

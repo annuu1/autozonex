@@ -8,6 +8,7 @@ import AllZones from './components/AllZones';
 import Signup from './pages/auth/signup';
 import Login from './pages/auth/login';
 import ProtectedRoute from './components/routes/ProtectedRoute';
+import TradeJournal from './pages/tradeJournal/TradeJournal';
 
 const App = () => {
   return (
@@ -92,6 +93,19 @@ const App = () => {
             </MainLayout>
           }
         />
+
+      <Route
+      path = "/trade-journal"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <TradeJournal />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+
+
       </Routes>
     </Router>
   );

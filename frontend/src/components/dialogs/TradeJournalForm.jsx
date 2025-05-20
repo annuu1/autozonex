@@ -6,25 +6,44 @@ import {
 } from "../../api/tradeJournal";
 
 const initialFormState = {
-  date: "",
+  tradeDate: "",
   symbol: "",
-  side: "",
+  tradeType: "",
+  entryPrice: "",
   quantity: "",
-  price: "",
+  positionSize: "",
   fees: "",
-  pnl: "",
-  notes: "",
+  stopLoss: "100",
+  strategy: "",
+  tags: [],
+  journalNotes: "",
+  setupScreenshotUrl: "",
+  emotionBefore: "",
 };
 
-const TradeJournalForm = ({
-  open,
-  onClose,
-  onSuccess,
-  editId = null, // if present, edit mode
-}) => {
+const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   const [form, setForm] = useState(initialFormState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+
+  // Calculate positionSize whenever entryPrice or quantity changes
+  useEffect(() => {
+    if (form.entryPrice && form.quantity) {
+      const calculatedPositionSize = (
+        parseFloat(form.entryPrice) * parseInt(form.quantity)
+      ).toFixed(2);
+      setForm((prev) => ({
+        ...prev,
+        positionSize: calculatedPositionSize,
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        positionSize: "",
+      }));
+    }
+  }, [form.entryPrice, form.quantity]);
 
   // Fetch entry if editing
   useEffect(() => {
@@ -33,15 +52,21 @@ const TradeJournalForm = ({
       fetchTradeJournal(editId)
         .then((data) => {
           setForm({
-            date: data.date ? data.date.slice(0, 10) : "",
+            tradeDate: data.tradeDate ? data.tradeDate.slice(0, 10) : "",
             symbol: data.symbol || "",
-            side: data.side || "",
+            tradeType: data.tradeType || "",
+            entryPrice: data.entryPrice || "",
             quantity: data.quantity || "",
-            price: data.price || "",
+            positionSize: data.positionSize || "",
             fees: data.fees || "",
-            pnl: data.pnl || "",
-            notes: data.notes || "",
+            stopLoss: data.stopLoss || "100",
+            strategy: data.strategy || "",
+            tags: data.tags || [],
+            journalNotes: data.journalNotes || "",
+            setupScreenshotUrl: data.setupScreenshotUrl || "",
+            emotionBefore: data.emotionBefore || "",
           });
+          setTagsInput(data.tags ? data.tags.join(", ") : "");
         })
         .catch((err) => {
           setError("Failed to load entry.");
@@ -49,6 +74,7 @@ const TradeJournalForm = ({
         .finally(() => setLoading(false));
     } else if (open) {
       setForm(initialFormState);
+      setTagsInput("");
       setError("");
     }
   }, [editId, open]);
@@ -61,15 +87,33 @@ const TradeJournalForm = ({
     }));
   };
 
+  const handleTagsChange = (e) => {
+    const value = e.target.value;
+    setTagsInput(value);
+    setForm((prev) => ({
+      ...prev,
+      tags: value ? value.split(",").map((tag) => tag.trim()).filter((tag) => tag) : [],
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
     try {
+      const payload = {
+        ...form,
+        entryPrice: form.entryPrice ? parseFloat(form.entryPrice) : undefined,
+        quantity: form.quantity ? parseInt(form.quantity) : undefined,
+        positionSize: form.positionSize ? parseFloat(form.positionSize) : undefined,
+        fees: form.fees ? parseFloat(form.fees) : undefined,
+        stopLoss: form.stopLoss ? parseFloat(form.stopLoss) : undefined,
+      };
+      console.log(payload)
       if (editId) {
-        await updateTradeJournal(editId, form);
+        await updateTradeJournal(editId, payload);
       } else {
-        await createTradeJournal(form);
+        await createTradeJournal(payload);
       }
       if (onSuccess) onSuccess();
       onClose();
@@ -86,28 +130,30 @@ const TradeJournalForm = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-2xl">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          {editId ? "Edit Trade Journal Entry" : "New Trade Journal Entry"}
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300">
+      <div className="bg-white rounded-xl w-full max-w-3xl shadow-2xl">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-xl p-6">
+          <h2 className="text-2xl font-bold">
+            {editId ? "Edit Trade Journal Entry" : "New Trade Journal Entry"}
+          </h2>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Date:
+              Trade Date <span className="text-red-500">*</span>
             </label>
             <input
               type="date"
-              name="date"
-              value={form.date}
+              name="tradeDate"
+              value={form.tradeDate}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring- olvas2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Symbol:
+              Symbol <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -115,28 +161,45 @@ const TradeJournalForm = ({
               value={form.symbol}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Side:
+              Trade Type <span className="text-red-500">*</span>
             </label>
             <select
-              name="side"
-              value={form.side}
+              name="tradeType"
+              value={form.tradeType}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             >
               <option value="">Select</option>
-              <option value="buy">Buy</option>
-              <option value="sell">Sell</option>
+              <option value="Buy">Buy</option>
+              <option value="Sell">Sell</option>
+              <option value="Short">Short</option>
+              <option value="Cover">Cover</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Quantity:
+              Entry Price <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              name="entryPrice"
+              value={form.entryPrice}
+              onChange={handleChange}
+              required
+              min="0"
+              step="any"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Quantity <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -145,28 +208,39 @@ const TradeJournalForm = ({
               onChange={handleChange}
               required
               min="0"
-              step="any"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              step="1"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price:
+              Position Size <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              required
-              min="0"
-              step="any"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              name="positionSize"
+              value={form.positionSize}
+              readOnly
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm bg-gray-100 cursor-not-allowed"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Fees:
+              Stop Loss
+            </label>
+            <input
+              type="number"
+              name="stopLoss"
+              value={form.stopLoss}
+              onChange={handleChange}
+              min="0"
+              step="any"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Fees
             </label>
             <input
               type="number"
@@ -175,50 +249,99 @@ const TradeJournalForm = ({
               onChange={handleChange}
               min="0"
               step="any"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              PnL:
+              Strategy ID
             </label>
             <input
-              type="number"
-              name="pnl"
-              value={form.pnl}
+              type="text"
+              name="strategy"
+              value={form.strategy}
               onChange={handleChange}
-              step="any"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Notes:
+              Tags (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={tagsInput}
+              onChange={handleTagsChange}
+              placeholder="e.g., swing, breakout"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+            {form.tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {form.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-800 bg-indigo-100 rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Setup Screenshot URL
+            </label>
+            <input
+              type="url"
+              name="setupScreenshotUrl"
+              value={form.setupScreenshotUrl}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Emotion Before
+            </label>
+            <input
+              type="text"
+              name="emotionBefore"
+              value={form.emotionBefore}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Journal Notes
             </label>
             <textarea
-              name="notes"
-              value={form.notes}
+              name="journalNotes"
+              value={form.journalNotes}
               onChange={handleChange}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="md:col-span-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+              {error}
+            </div>
           )}
-          <div className="flex justify-end space-x-4 mt-6">
+          <div className="md:col-span-2 flex justify-end space-x-4 mt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 transition duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-200"
             >
               {loading ? "Saving..." : editId ? "Update" : "Create"}
             </button>

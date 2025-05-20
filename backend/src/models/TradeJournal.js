@@ -25,7 +25,7 @@ const TradeJournalSchema = new mongoose.Schema({
   broker: { type: String },
   market: { type: String },
   holdingPeriod: { type: String },
-  createdBy:{type: mongoose.Schema.Types.ObjectId, ref: "User", required: true}
+  riskRewardRatio: { type: String },
 }, {
   timestamps: true // This will add createdAt and updatedAt fields automatically
 });

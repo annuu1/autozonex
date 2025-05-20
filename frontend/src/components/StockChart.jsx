@@ -64,15 +64,15 @@ const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `Zone Top (${selectedZone.pattern})`,
+            title: `Top (${selectedZone.pattern})`,
           });
           candlestickSeries.createPriceLine({
             price: selectedZone.distalLine,
-            color: 'rgba(0, 150, 136, 0.5)',
+            color: 'rgba(150, 0, 105, 0.5)',
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `Zone Bottom (${selectedZone.pattern})`,
+            title: `Bottom (${selectedZone.pattern})`,
           });
           
         }else{

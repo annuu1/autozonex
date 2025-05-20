@@ -50,6 +50,17 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
+                  to="/all-zones"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  All Zones
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
                   to="/watchlist"
                   className={({ isActive }) =>
                     `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`

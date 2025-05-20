@@ -6,11 +6,12 @@ import {
 } from "../../api/tradeJournal";
 
 const initialFormState = {
-  tradeDate: "",
+  tradeDate: new Date().toISOString().slice(0, 10),
   symbol: "",
-  tradeType: "",
+  tradeType: "Buy",
   entryPrice: "",
   quantity: "",
+  status: "Open",
   positionSize: "",
   fees: "",
   stopLoss: "100",
@@ -26,16 +27,21 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [tagsInput, setTagsInput] = useState("");
+  const [stopLossTouched, setStopLossTouched] = useState(false);
 
   // Calculate positionSize whenever entryPrice or quantity changes
   useEffect(() => {
     if (form.entryPrice && form.quantity) {
-      const calculatedPositionSize = (
-        parseFloat(form.entryPrice) * parseInt(form.quantity)
-      ).toFixed(2);
+      const entryPriceFloat = parseFloat(form.entryPrice);
+      const calculatedPositionSize = (entryPriceFloat * parseInt(form.quantity)).toFixed(2);
+  
       setForm((prev) => ({
         ...prev,
         positionSize: calculatedPositionSize,
+        stopLoss:
+          !stopLossTouched
+            ? (entryPriceFloat * 0.99).toFixed(2)
+            : prev.stopLoss,
       }));
     } else {
       setForm((prev) => ({
@@ -43,7 +49,8 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
         positionSize: "",
       }));
     }
-  }, [form.entryPrice, form.quantity]);
+  }, [form.entryPrice, form.quantity, stopLossTouched]);
+  
 
   // Fetch entry if editing
   useEffect(() => {
@@ -175,7 +182,6 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             >
-              <option value="">Select</option>
               <option value="Buy">Buy</option>
               <option value="Sell">Sell</option>
               <option value="Short">Short</option>
@@ -232,7 +238,10 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
               type="number"
               name="stopLoss"
               value={form.stopLoss}
-              onChange={handleChange}
+              onChange={(e) => {
+                handleChange(e);
+                setStopLossTouched(true);
+              }}
               min="0"
               step="any"
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -312,6 +321,24 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            >
+              <option value="Open">Open</option>
+              <option value="Planned">Planned</option>
+              <option value="Closed">Closed</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Journal Notes

@@ -16,6 +16,11 @@ const TradeJournalSchema = new mongoose.Schema({
   fees: { type: Number },
   strategy: { type: mongoose.Schema.Types.ObjectId, ref: "Strategy" },
   tags: [String],
+  status: {
+    type: String,
+    enum: ['Planned', 'Open', 'Closed', 'Cancelled'],
+    default: 'Planned'
+  },
   
   setupScreenshotUrl: { type: String },
   journalNotes: { type: String },

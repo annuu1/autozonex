@@ -170,11 +170,11 @@ const TradeJournal = () => {
             ) : (
               journals.map((j) => (
                 <tr key={j._id} className="border-t border-gray-200 hover:bg-gray-50">
-                  <td className="px-4 py-2">{j.date ? j.date.slice(0, 10) : ""}</td>
+                  <td className="px-4 py-2">{j.tradeDate ? j.tradeDate.slice(0, 10) : ""}</td>
                   <td className="px-4 py-2">{j.symbol}</td>
                   <td className="px-4 py-2">{j.side}</td>
                   <td className="px-4 py-2">{j.quantity}</td>
-                  <td className="px-4 py-2">{j.price}</td>
+                  <td className="px-4 py-2">{j.entryPrice}</td>
                   <td className="px-4 py-2">{j.pnl}</td>
                   <td className="px-4 py-2">{j.fees}</td>
                   <td className="px-4 py-2">{j.notes}</td>

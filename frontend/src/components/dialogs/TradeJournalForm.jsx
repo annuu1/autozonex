@@ -109,7 +109,6 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
         fees: form.fees ? parseFloat(form.fees) : undefined,
         stopLoss: form.stopLoss ? parseFloat(form.stopLoss) : undefined,
       };
-      console.log(payload)
       if (editId) {
         await updateTradeJournal(editId, payload);
       } else {

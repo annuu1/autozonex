@@ -1,27 +1,76 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
+import MainLayout from './components/layouts/MainLayout';
+import AuthLayout from './components/layouts/AuthLayout';
 import Dashboard from './components/Dashboard';
-import StockChart from './components/StockChart';
 import StockCharting from './components/StockCharting';
 import AllZones from './components/AllZones';
+import Signup from './pages/auth/signup';
 
 const App = () => {
   return (
     <Router>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="flex-1 sm:ml-64 p-4 bg-gray-100">
-          <Routes>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/all-zones" element={<AllZones />} />
-            <Route path="/chart" element={<StockCharting ticker="RELIANCE.NS" timeFrame="1d" />} />
-            <Route path="/watchlist" element={<div>Watchlist (TBD)</div>} />
-            <Route path="/settings" element={<div>Settings (TBD)</div>} />
-            <Route path="/" element={<Dashboard />} />
-          </Routes>
-        </div>
-      </div>
+      <Routes>
+        {/* Auth Pages */}
+        <Route
+          path="/signup"
+          element={
+            <AuthLayout>
+              <Signup />
+            </AuthLayout>
+          }
+        />
+
+        {/* App Pages (with sidebar) */}
+        <Route
+          path="/"
+          element={
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <MainLayout>
+              <Dashboard />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/all-zones"
+          element={
+            <MainLayout>
+              <AllZones />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/chart"
+          element={
+            <MainLayout>
+              <StockCharting ticker="RELIANCE.NS" timeFrame="1d" />
+            </MainLayout>
+          }
+        />
+        <Route
+        path='/watchlist'
+        element={
+          <MainLayout>
+            <h1>Watch list</h1>
+          </MainLayout>
+        }
+        />
+        <Route
+        path='/settings'
+        element={
+          <MainLayout>
+            <h1>Profile settings</h1>
+          </MainLayout>
+        }
+        />
+      </Routes>
     </Router>
   );
 };

@@ -157,6 +157,7 @@ const TradeJournal = () => {
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">PnL</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Fees</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Notes</th>
+              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
               <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
             </tr>
           </thead>
@@ -178,6 +179,7 @@ const TradeJournal = () => {
                   <td className="px-4 py-2">{j.pnl}</td>
                   <td className="px-4 py-2">{j.fees}</td>
                   <td className="px-4 py-2">{j.notes}</td>
+                  <td className="px-4 py-2">{j.status}</td>
                   <td className="px-4 py-2 flex space-x-2">
                     <button
                       onClick={() => handleEdit(j)}

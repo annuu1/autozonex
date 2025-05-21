@@ -93,8 +93,8 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
               id="riskPerTrade"
               type="number"
               min="0"
-              max="100"
-              step="0.01"
+              max="100000"
+              step="2"
               value={riskPerTrade}
               onChange={(e) => setRiskPerTrade(e.target.value)}
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

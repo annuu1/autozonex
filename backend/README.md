@@ -1,6 +1,6 @@
-# GTF Trading Backend
+# AutozoneX Backend
 
-Express.js API for the GTF trading application.
+Express.js API for the AutozoneX application.
 
 ## Setup
 1. Install dependencies: `npm install`

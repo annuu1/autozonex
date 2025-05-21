@@ -9,7 +9,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1>GTF Trading Dashboard</h1>
+      <h1>AutozoneX Dashboard</h1>
       <StockChart data={sampleData} />
     </div>
   );

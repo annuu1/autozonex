@@ -64,7 +64,7 @@ const AllZones = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">GTF Trading Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
 
       {loading && (
         <div className="flex justify-center my-4">

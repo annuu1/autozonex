@@ -60,7 +60,7 @@ const Dashboard = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">GTF Trading Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
 
       {/* Inputs */}
       <div className="mb-4 flex flex-col sm:flex-row gap-4">

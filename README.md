@@ -1,6 +1,6 @@
-# GTF Trading Application
+# AutozoneX Application
 
-A MERN stack application implementing the Get Together Finance (GTF) trading strategy for the Indian stock market.
+A MERN stack application implementing the Get Together Finance (AutozoneX) trading strategy for the Indian stock market.
 
 ## Structure
 - `backend/`: Express.js API for data fetching, zone analysis, and strategy implementation.

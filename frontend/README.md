@@ -1,6 +1,6 @@
-# GTF Trading Frontend
+# AutozoneX Frontend
 
-React.js interface for the GTF trading application.
+React.js interface for the AutozoneX application.
 
 ## Setup
 1. Install dependencies: `npm install`

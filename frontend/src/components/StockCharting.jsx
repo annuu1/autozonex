@@ -7,7 +7,7 @@ const StockCharting = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">GTF Trading Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
       <div className="mb-4">
         <label className="mr-2">Ticker:</label>
         <input

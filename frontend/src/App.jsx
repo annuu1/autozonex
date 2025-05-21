@@ -9,6 +9,7 @@ import Signup from './pages/auth/signup';
 import Login from './pages/auth/login';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import TradeJournal from './pages/tradeJournal/TradeJournal';
+import Settings from './pages/settings/Settings';
 
 const App = () => {
   return (
@@ -88,7 +89,7 @@ const App = () => {
           element={
             <MainLayout>
               <ProtectedRoute>
-                <h1>Profile settings</h1>
+                <Settings />
               </ProtectedRoute>
             </MainLayout>
           }

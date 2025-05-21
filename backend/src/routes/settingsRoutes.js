@@ -8,11 +8,6 @@ const {
   deleteSettings
 } = require('../controllers/settingsController');
 
-const requireAuth = require('../middleware/requireAuth');
-
-// Apply authentication middleware to all routes
-router.use(requireAuth);
-
 // Create new settings
 router.post('/', auth, createSettings);
 

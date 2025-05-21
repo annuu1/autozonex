@@ -5,6 +5,7 @@ import {
   fetchTradeJournal,
 } from "../../api/tradeJournal";
 
+// Ensure all fields in initialFormState are initialized to prevent undefined
 const initialFormState = {
   tradeDate: new Date().toISOString().slice(0, 10),
   symbol: "",
@@ -38,7 +39,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   const [tagsInput, setTagsInput] = useState("");
   const [stopLossTouched, setStopLossTouched] = useState(false);
   const [useRiskPerTrade, setUseRiskPerTrade] = useState(false);
-  const [riskPerTrade, setRiskPerTrade] = useState(100); // Hardcoded to 100 rupees
+  const [riskPerTrade, setRiskPerTrade] = useState(100);
 
   // Calculate quantity and positionSize based on riskPerTrade toggle
   useEffect(() => {
@@ -47,7 +48,6 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
       const stopLossFloat = parseFloat(form.stopLoss);
 
       if (useRiskPerTrade && entryPriceFloat > stopLossFloat) {
-        // Calculate quantity: riskPerTrade / (entryPrice - stopLoss)
         const quantity = Math.floor(riskPerTrade / (entryPriceFloat - stopLossFloat));
         const calculatedPositionSize = (quantity * entryPriceFloat).toFixed(2);
         setForm((prev) => ({
@@ -56,7 +56,6 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
           positionSize: calculatedPositionSize,
         }));
       } else if (form.quantity) {
-        // Default behavior: positionSize = entryPrice * quantity
         const calculatedPositionSize = (entryPriceFloat * parseInt(form.quantity)).toFixed(2);
         setForm((prev) => ({
           ...prev,
@@ -67,13 +66,14 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
         setForm((prev) => ({
           ...prev,
           positionSize: "",
+          quantity: useRiskPerTrade ? prev.quantity : "",
         }));
       }
     } else {
       setForm((prev) => ({
         ...prev,
         positionSize: "",
-        quantity: useRiskPerTrade ? prev.quantity : "", // Preserve quantity if using riskPerTrade
+        quantity: useRiskPerTrade ? prev.quantity : "",
       }));
     }
   }, [form.entryPrice, form.stopLoss, form.quantity, useRiskPerTrade, riskPerTrade, stopLossTouched]);
@@ -82,15 +82,43 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   useEffect(() => {
     if (editId && open) {
       setLoading(true);
-      const fetchData = async ()=>{
+      const fetchData = async () => {
         try {
           const data = await fetchTradeJournal(editId);
-          setForm(data);
+          // Sanitize the fetched data to ensure no null/undefined values
+          const sanitizedData = {
+            ...initialFormState, // Start with defaults
+            ...data, // Override with fetched data
+            tradeDate: data.tradeDate ? data.tradeDate.split("T")[0] : initialFormState.tradeDate,
+            exitDate: data.exitDate ? data.exitDate.split("T")[0] : "",
+            entryPrice: data.entryPrice != null ? data.entryPrice.toString() : "",
+            exitPrice: data.exitPrice != null ? data.exitPrice.toString() : "",
+            quantity: data.quantity != null ? data.quantity.toString() : "",
+            positionSize: data.positionSize != null ? data.positionSize.toString() : "",
+            stopLoss: data.stopLoss != null ? data.stopLoss.toString() : "100",
+            takeProfit: data.takeProfit != null ? data.takeProfit.toString() : "",
+            pnl: data.pnl != null ? data.pnl.toString() : "",
+            fees: data.fees != null ? data.fees.toString() : "",
+            strategy: data.strategy || "WIT",
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            status: data.status || "Open",
+            setupScreenshotUrl: data.setupScreenshotUrl || "",
+            journalNotes: data.journalNotes || "",
+            emotionBefore: data.emotionBefore || "",
+            emotionAfter: data.emotionAfter || "",
+            broker: data.broker || "",
+            market: data.market || "",
+            holdingPeriod: data.holdingPeriod || "",
+            riskRewardRatio: data.riskRewardRatio || "",
+          };
+          setForm(sanitizedData);
+          setTagsInput(sanitizedData.tags.join(", "));
         } catch (err) {
-          setError("Failed to load entry.");
+          setError("Failed to load entry...");
         } finally {
           setLoading(false);
-      }}
+        }
+      };
       fetchData();
     } else if (open) {
       setForm(initialFormState);
@@ -103,14 +131,16 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Ensure numeric fields are not set to null/undefined
+    const sanitizedValue = value === null || value === undefined ? "" : value;
     setForm((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: sanitizedValue,
     }));
   };
 
   const handleTagsChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value || ""; // Prevent null/undefined
     setTagsInput(value);
     setForm((prev) => ({
       ...prev,
@@ -133,13 +163,13 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
         takeProfit: form.takeProfit ? parseFloat(form.takeProfit) : undefined,
         pnl: form.pnl ? parseFloat(form.pnl) : undefined,
         fees: form.fees ? parseFloat(form.fees) : undefined,
-        tradeDate: form.tradeDate ? form.tradeDate : undefined,
-        exitDate: form.exitDate ? form.exitDate : undefined,
+        tradeDate: form.tradeDate || undefined,
+        exitDate: form.exitDate || undefined,
       };
       if (editId) {
         await updateTradeJournal(editId, payload);
       } else {
-        await onSuccess(payload); // Send payload to parent
+        await onSuccess(payload);
       }
       onClose();
     } catch (err) {
@@ -176,7 +206,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
           )}
         </div>
         <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Required Fields (Always Displayed) */}
+          {/* Required Fields */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Trade Date <span className="text-red-500">*</span>
@@ -184,7 +214,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="date"
               name="tradeDate"
-              value={form.tradeDate}
+              value={form.tradeDate || ""}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -197,7 +227,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="text"
               name="symbol"
-              value={form.symbol}
+              value={form.symbol || ""}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -209,7 +239,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             </label>
             <select
               name="tradeType"
-              value={form.tradeType}
+              value={form.tradeType || "Buy"}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -227,7 +257,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="number"
               name="entryPrice"
-              value={form.entryPrice}
+              value={form.entryPrice || ""}
               onChange={handleChange}
               required
               min="0"
@@ -242,7 +272,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="number"
               name="stopLoss"
-              value={form.stopLoss}
+              value={form.stopLoss || ""}
               onChange={(e) => {
                 handleChange(e);
                 setStopLossTouched(true);
@@ -260,7 +290,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="number"
               name="quantity"
-              value={form.quantity}
+              value={form.quantity || ""}
               onChange={handleChange}
               required
               min="0"
@@ -278,7 +308,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="number"
               name="positionSize"
-              value={form.positionSize}
+              value={form.positionSize || ""}
               readOnly
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm bg-gray-100 cursor-not-allowed"
             />
@@ -290,7 +320,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <input
               type="text"
               name="strategy"
-              value={form.strategy}
+              value={form.strategy || ""}
               onChange={handleChange}
               required={!editId}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -302,7 +332,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             </label>
             <select
               name="status"
-              value={form.status}
+              value={form.status || "Open"}
               onChange={handleChange}
               required
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -315,7 +345,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             </select>
           </div>
 
-          {/* Optional Fields (Displayed Only When Editing) */}
+          {/* Optional Fields */}
           {editId && (
             <>
               <div>
@@ -325,7 +355,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="number"
                   name="exitPrice"
-                  value={form.exitPrice}
+                  value={form.exitPrice || ""}
                   onChange={handleChange}
                   min="0"
                   step="any"
@@ -339,7 +369,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="date"
                   name="exitDate"
-                  value={form.exitDate}
+                  value={form.exitDate || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -351,7 +381,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="number"
                   name="takeProfit"
-                  value={form.takeProfit}
+                  value={form.takeProfit || ""}
                   onChange={handleChange}
                   min="0"
                   step="any"
@@ -365,7 +395,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="number"
                   name="pnl"
-                  value={form.pnl}
+                  value={form.pnl || ""}
                   onChange={handleChange}
                   step="any"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -378,7 +408,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="number"
                   name="fees"
-                  value={form.fees}
+                  value={form.fees || ""}
                   onChange={handleChange}
                   min="0"
                   step="any"
@@ -391,7 +421,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 </label>
                 <input
                   type="text"
-                  value={tagsInput}
+                  value={tagsInput || ""}
                   onChange={handleTagsChange}
                   placeholder="e.g., swing, breakout"
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
@@ -416,7 +446,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="url"
                   name="setupScreenshotUrl"
-                  value={form.setupScreenshotUrl}
+                  value={form.setupScreenshotUrl || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -428,7 +458,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="text"
                   name="emotionBefore"
-                  value={form.emotionBefore}
+                  value={form.emotionBefore || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -440,7 +470,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="text"
                   name="emotionAfter"
-                  value={form.emotionAfter}
+                  value={form.emotionAfter || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -452,7 +482,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="text"
                   name="broker"
-                  value={form.broker}
+                  value={form.broker || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -464,7 +494,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="text"
                   name="market"
-                  value={form.market}
+                  value={form.market || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
@@ -476,63 +506,63 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
                 <input
                   type="text"
                   name="holdingPeriod"
-                  value={form.holdingPeriod}
+                  value={form.holdingPeriod || ""}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Risk/Reward Ratio
+                </label>
+                <input
+                  type="text"
+                  name="riskRewardRatio"
+                  value={form.riskRewardRatio || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Journal Notes
+                </label>
+                <textarea
+                  name="journalNotes"
+                  value={form.journalNotes || ""}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                />
+              </div>
+            </>
+          )}
+          {error && (
+            <div className="md:col-span-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+              {error}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Risk/Reward Ratio
-              </label>
-              <input
-                type="text"
-                name="riskRewardRatio"
-                value={form.riskRewardRatio}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Journal Notes
-              </label>
-              <textarea
-                name="journalNotes"
-                value={form.journalNotes}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-              />
-            </div>
-          </>
-        )}
-        {error && (
-          <div className="md:col-span-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg">
-            {error}
+          )}
+          <div className="md:col-span-2 flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 transition duration-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-200"
+            >
+              {loading ? "Saving..." : editId ? "Update" : "Create"}
+            </button>
           </div>
-        )}
-        <div className="md:col-span-2 flex justify-end space-x-4 mt-6">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 disabled:opacity-50 transition duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 transition duration-200"
-          >
-            {loading ? "Saving..." : editId ? "Update" : "Create"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default TradeJournalForm;

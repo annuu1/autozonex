@@ -82,39 +82,16 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   useEffect(() => {
     if (editId && open) {
       setLoading(true);
-      fetchTradeJournal(editId)
-        .then((data) => {
-          setForm({
-            tradeDate: data.tradeDate ? data.tradeDate.slice(0, 10) : "",
-            symbol: data.symbol || "",
-            tradeType: data.tradeType || "Buy",
-            entryPrice: data.entryPrice || "",
-            exitPrice: data.exitPrice || "",
-            exitDate: data.exitDate ? data.exitDate.slice(0, 10) : "",
-            quantity: data.quantity || "",
-            positionSize: data.positionSize || "",
-            stopLoss: data.stopLoss || "100",
-            takeProfit: data.takeProfit || "",
-            pnl: data.pnl || "",
-            fees: data.fees || "",
-            strategy: data.strategy || "WIT",
-            tags: data.tags || [],
-            status: data.status || "Open",
-            setupScreenshotUrl: data.setupScreenshotUrl || "",
-            journalNotes: data.journalNotes || "",
-            emotionBefore: data.emotionBefore || "",
-            emotionAfter: data.emotionAfter || "",
-            broker: data.broker || "",
-            market: data.market || "",
-            holdingPeriod: data.holdingPeriod || "",
-            riskRewardRatio: data.riskRewardRatio || "",
-          });
-          setTagsInput(data.tags ? data.tags.join(", ") : "");
-        })
-        .catch((err) => {
+      const fetchData = async ()=>{
+        try {
+          const data = await fetchTradeJournal(editId);
+          setForm(data);
+        } catch (err) {
           setError("Failed to load entry.");
-        })
-        .finally(() => setLoading(false));
+        } finally {
+          setLoading(false);
+      }}
+      fetchData();
     } else if (open) {
       setForm(initialFormState);
       setTagsInput("");

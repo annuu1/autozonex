@@ -1,3 +1,4 @@
+import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 // Helper to get auth headers
@@ -22,14 +23,13 @@ export async function fetchTradeJournals() {
 
 // Get a specific trade journal entry by ID
 export async function fetchTradeJournal(id) {
-  const res = await fetch(`${API_URL}/trade-journal/${id}`, {
+  const res = await axios.get(`${API_URL}/trade-journal/${id}`, {
     headers: {
       ...getAuthHeaders(),
-      'Content-Type': 'application/json',
-    },
+    }
   });
-  if (!res.ok) throw new Error('Failed to fetch trade journal entry');
-  return res.json();
+  if (res.status !== 200) throw new Error('Failed to fetch trade journal entry');
+  return res.data;
 }
 
 // Create a new trade journal entry

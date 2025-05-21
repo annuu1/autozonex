@@ -12,6 +12,9 @@ router.get('/', auth, tradeJournalController.getAllTradeJournals);
 // Create a new trade journal entry
 router.post('/', auth, tradeJournalController.createTradeJournal);
 
+// Get a specific trade journal entry by ID
+router.get('/:id', auth, tradeJournalController.getTradeJournal);
+
 // Update an existing trade journal entry by ID
 router.put('/:id', auth, tradeJournalController.updateTradeJournal);
 

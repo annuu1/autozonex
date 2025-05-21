@@ -16,6 +16,7 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
   const settingsId = existingSettings?._id;
 
   const handleSubmit = async (e) => {
+    const token = localStorage.getItem('token');
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -23,10 +24,10 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
 
     try {
       if (settingsId) {
-        await updateSettings({ riskPerTrade });
+        await updateSettings({ riskPerTrade }, token);
         setSuccess("Settings updated successfully.");
       } else {
-        await createSettings({ riskPerTrade });
+        await createSettings({ riskPerTrade }, token);
         setSuccess("Settings created successfully.");
       }
       onClose && onClose();
@@ -48,7 +49,8 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
     setSuccess("");
 
     try {
-      await deleteSettings();
+      const token = localStorage.getItem('token');
+      await deleteSettings(token);
       setRiskPerTrade("");
       setSuccess("Settings deleted successfully.");
       onClose && onClose();
@@ -79,14 +81,13 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
         <h2 className="text-2xl font-semibold mb-6 text-gray-800">
           {settingsId ? "Edit Settings" : "Add Settings"}
         </h2>
-
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="riskPerTrade"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              Risk Per Trade (%)
+              Risk Per Trade (₹)
             </label>
             <input
               id="riskPerTrade"

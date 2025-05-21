@@ -14,7 +14,8 @@ const Settings = () => {
     setLoading(true);
     setError('');
     try {
-      const data = await getSettings();
+      const token = localStorage.getItem('token');
+      const data = await getSettings(token);
       setSettings(data);
     } catch (err) {
       setSettings(null);
@@ -51,14 +52,15 @@ const Settings = () => {
   };
 
   const handleFormSubmit = async (values) => {
+    const token = localStorage.getItem('token');
     setError('');
     setSuccess('');
     try {
       if (formMode === 'add') {
-        await createSettings(values);
+        await createSettings(values, token);
         setSuccess('Settings created successfully.');
       } else {
-        await updateSettings(values);
+        await updateSettings(values, token);
         setSuccess('Settings updated successfully.');
       }
       setFormOpen(false);
@@ -76,7 +78,7 @@ const Settings = () => {
     setError('');
     setSuccess('');
     try {
-      await deleteSettings();
+      await deleteSettings(token);
       setSettings(null);
       setSuccess('Settings deleted successfully.');
     } catch (err) {
@@ -114,7 +116,7 @@ const Settings = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-gray-600">Risk Per Trade:</p>
-                <p className="text-xl font-semibold">{settings.riskPerTrade}%</p>
+                <p className="text-xl font-semibold">{settings.riskPerTrade} -/</p>
               </div>
 
               <div className="flex space-x-3">
@@ -148,23 +150,13 @@ const Settings = () => {
 
       {/* Custom modal */}
       {formOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              {formMode === 'add' ? 'Add Settings' : 'Edit Settings'}
-            </h2>
-            <SettingsForm
-              initialValues={
-                formMode === 'edit' && settings
-                  ? { riskPerTrade: settings.riskPerTrade }
-                  : { riskPerTrade: '' }
-              }
-              onSubmit={handleFormSubmit}
-              onCancel={handleFormClose}
-              loading={loading}
-            />
-          </div>
-        </div>
+        <SettingsForm
+          open={formOpen}
+          onClose={handleFormClose}
+          existingSettings={settings}
+          onSubmit={handleFormSubmit}
+          loading={loading}
+        />
       )}
     </div>
   );

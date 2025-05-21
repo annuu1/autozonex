@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import TradeJournalForm from "../../components/dialogs/TradeJournalForm";
+import {formatDate} from "../../utils/formatDate"
 
 // --- API Consumer Functions ---
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -171,8 +172,8 @@ const TradeJournal = () => {
             ) : (
               journals.map((j) => (
                 <tr key={j._id} className="border-t border-gray-200 hover:bg-gray-50">
-                  <td className="px-4 py-2">{j.tradeDate ? j.tradeDate.slice(0, 10) : ""}</td>
-                  <td className="px-4 py-2">{j.symbol}</td>
+                  <td className="px-4 py-2 text-nowrap">{j.tradeDate ? formatDate(j.tradeDate) : ""}</td>
+                  <td className="px-4 py-2">{j.symbol.toUpperCase()}</td>
                   <td className="px-4 py-2">{j.side}</td>
                   <td className="px-4 py-2">{j.quantity}</td>
                   <td className="px-4 py-2">{j.entryPrice}</td>

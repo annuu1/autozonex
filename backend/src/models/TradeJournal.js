@@ -18,7 +18,7 @@ const TradeJournalSchema = new mongoose.Schema({
   tags: [String],
   status: {
     type: String,
-    enum: ['Planned', 'Open', 'Closed', 'Cancelled'],
+    enum: ['Planned', 'Open', 'Closed', 'Cancelled', 'Paper'],
     default: 'Planned'
   },
   

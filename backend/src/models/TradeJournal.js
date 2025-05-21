@@ -14,7 +14,7 @@ const TradeJournalSchema = new mongoose.Schema({
   takeProfit: { type: Number },
   pnl: { type: Number },
   fees: { type: Number },
-  strategy: { type: mongoose.Schema.Types.ObjectId, ref: "Strategy" },
+  strategy: { type: String },
   tags: [String],
   status: {
     type: String,

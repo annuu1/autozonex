@@ -15,7 +15,7 @@ const initialFormState = {
   positionSize: "",
   fees: "",
   stopLoss: "100",
-  strategy: "",
+  strategy: "WIT",
   tags: [],
   journalNotes: "",
   setupScreenshotUrl: "",
@@ -263,7 +263,7 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Strategy ID
+              Strategy
             </label>
             <input
               type="text"

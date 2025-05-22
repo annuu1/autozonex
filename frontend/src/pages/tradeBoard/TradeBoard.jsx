@@ -12,7 +12,7 @@ function TradeBoard() {
       </div>
 
       {/* Content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 flex-col">
         <StockScreener className="flex-1" />
         <HeatMap className="flex-1" />
       </div>

@@ -26,6 +26,17 @@ const Sidebar = () => {
           <h2 className="text-2xl font-bold mb-6">AutozoneX</h2>
           <nav>
             <ul className="space-y-2">
+            <li>
+                <NavLink
+                  to="/tradeboard"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  TradeBoard
+                </NavLink>
+              </li>
               <li>
                 <NavLink
                   to="/dashboard"

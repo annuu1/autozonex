@@ -10,6 +10,7 @@ import Login from './pages/auth/login';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import TradeJournal from './pages/tradeJournal/TradeJournal';
 import Settings from './pages/settings/Settings';
+import TradeBoard from './pages/tradeBoard/TradeBoard';
 
 const App = () => {
   return (
@@ -40,6 +41,16 @@ const App = () => {
             <MainLayout>
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/tradeboard"
+          element={
+            <MainLayout>
+              <ProtectedRoute>
+                <TradeBoard />
               </ProtectedRoute>
             </MainLayout>
           }

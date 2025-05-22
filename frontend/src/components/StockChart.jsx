@@ -80,22 +80,24 @@ const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
         console.log('Fetched zones:', fetchedZones);
 
         fetchedZones.forEach(zone => {
-          candlestickSeries.createPriceLine({
-            price: zone.proximalLine,
-            color: 'rgba(0, 150, 136, 0.5)',
-            lineWidth: 2,
-            lineStyle: 0,
-            axisLabelVisible: true,
-            title: `Zone Top (${zone.pattern})`,
-          });
-          candlestickSeries.createPriceLine({
-            price: zone.distalLine,
-            color: 'rgba(0, 150, 136, 0.5)',
-            lineWidth: 2,
-            lineStyle: 0,
-            axisLabelVisible: true,
-            title: `Zone Bottom (${zone.pattern})`,
-          });
+          if(zone.freshness > 0){
+            candlestickSeries.createPriceLine({
+              price: zone.proximalLine,
+              color: 'rgba(0, 150, 136, 0.5)',
+              lineWidth: 2,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `P (${zone.pattern})`,
+            });
+            candlestickSeries.createPriceLine({
+              price: zone.distalLine,
+              color: 'rgba(0, 150, 136, 0.5)',
+              lineWidth: 2,
+              lineStyle: 0,
+              axisLabelVisible: true,
+              title: `D (${zone.pattern})`,
+            });
+          }
         });
         }
 

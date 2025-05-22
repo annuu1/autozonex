@@ -1,8 +1,9 @@
 import React from 'react'
+import TradingViewChartWidget from '../../components/charts/TradingViewChartWidget'
 
 function TradeBoard() {
   return (
-    <div>TradeBoard</div>
+    <TradingViewChartWidget />
   )
 }
 

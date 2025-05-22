@@ -26,7 +26,7 @@ const Sidebar = () => {
           <h2 className="text-2xl font-bold mb-6">AutozoneX</h2>
           <nav>
             <ul className="space-y-2">
-            <li>
+              <li>
                 <NavLink
                   to="/tradeboard"
                   className={({ isActive }) =>
@@ -71,7 +71,6 @@ const Sidebar = () => {
                 </NavLink>
               </li>
               <li>
-              <li>
                 <NavLink
                   to="/all-zones"
                   className={({ isActive }) =>
@@ -82,6 +81,7 @@ const Sidebar = () => {
                   All Zones
                 </NavLink>
               </li>
+              <li>
                 <NavLink
                   to="/chart"
                   className={({ isActive }) =>

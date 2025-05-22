@@ -860,9 +860,18 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
 
     // Save zones to MongoDB
     if (allZones.length > 0) {
-      await Zone.insertMany(allZones);
-      logger.info(`Saved ${allZones.length} daily demand zones for ${timeFrame} on ${target.toISOString().split('T')[0]}`);
+      try {
+        await Zone.insertMany(allZones, { ordered: false });
+        logger.info(`Inserted ${allZones.length} zones`);
+      } catch (err) {
+        if (err.code === 11000) {
+          logger.warn('Duplicate zone(s) skipped during insert.');
+        } else {
+          throw err;
+        }
+      }
     }
+    
 
     return allZones;
   } catch (err) {

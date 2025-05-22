@@ -57,6 +57,11 @@ const ZoneSchema = new mongoose.Schema({
 });
 
 // Compound index for efficient queries
-ZoneSchema.index({ ticker: 1, timeFrame: 1, createdAt: -1 });
+// ZoneSchema.index({ ticker: 1, timeFrame: 1, createdAt: -1 });
+ZoneSchema.index(
+  { ticker: 1, timeFrame: 1, type: 1, proximalLine: 1, distalLine: 1, legOutDate: 1 },
+  { unique: true }
+);
+
 
 module.exports = mongoose.model('Zone', ZoneSchema);

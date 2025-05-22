@@ -39,28 +39,6 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
-                  to="/chart"
-                  className={({ isActive }) =>
-                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  Stock Chart
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/all-zones"
-                  className={({ isActive }) =>
-                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  All Zones
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
                   to="/watchlist"
                   className={({ isActive }) =>
                     `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
@@ -72,17 +50,6 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
-                  to="/settings"
-                  className={({ isActive }) =>
-                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  Settings
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
                   to="/trade-journal"
                   className={({ isActive }) =>
                     `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
@@ -90,6 +57,39 @@ const Sidebar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Trade Journal
+                </NavLink>
+              </li>
+              <li>
+              <li>
+                <NavLink
+                  to="/all-zones"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  All Zones
+                </NavLink>
+              </li>
+                <NavLink
+                  to="/chart"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Stock Chart
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/settings"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Settings
                 </NavLink>
               </li>
             </ul>

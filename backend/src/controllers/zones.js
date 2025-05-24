@@ -61,7 +61,7 @@ const getAllDemandZones = async (req, res) => {
 
 const getDailyDemandZones = async (req, res) => {
   try {
-    const { timeFrame = '1d', tickers } = req.query;
+    const { timeFrame = '1d', tickers,targetDate } = req.query;
     const tickerList = tickers ? tickers.split(',') : undefined;
 
     // Validate timeFrame
@@ -78,7 +78,7 @@ const getDailyDemandZones = async (req, res) => {
       }
     }
 
-    const zones = await identifyDailyDemandZones(timeFrame, tickerList);
+    const zones = await identifyDailyDemandZones(timeFrame, tickerList, targetDate);
     res.json({
       total: zones.length,
       data: zones,

@@ -24,7 +24,7 @@ const AddNote = ({ open, onClose, onSave }) => {
     setError("");
     try {
       // Call the API helper to create the note
-      await createNote({ title, content });
+    //   await createNote({ title, content });
       setTitle("");
       setContent("");
       if (onSave) onSave({ title, content });

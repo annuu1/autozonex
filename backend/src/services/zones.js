@@ -689,10 +689,10 @@ const identifyDemandZones = async (ticker, timeFrame = '1d') => {
     }
 
     // Save zones to MongoDB
-    if (zones.length > 0) {
-      await Zone.insertMany(zones);
-      winston.info(`Saved ${zones.length} demand zones for ${ticker} (${timeFrame})`);
-    }
+    // if (zones.length > 0) {
+    //   await Zone.insertMany(zones);
+    //   winston.info(`Saved ${zones.length} demand zones for ${ticker} (${timeFrame})`);
+    // }
 
     return zones;
   } catch (err) {

@@ -28,17 +28,6 @@ const Sidebar = () => {
             <ul className="space-y-2">
               <li>
                 <NavLink
-                  to="/tradeboard"
-                  className={({ isActive }) =>
-                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
-                  }
-                  onClick={() => setIsOpen(false)}
-                >
-                  TradeBoard
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
                   to="/dashboard"
                   className={({ isActive }) =>
                     `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
@@ -57,6 +46,17 @@ const Sidebar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Watchlist
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/notes"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Notes
                 </NavLink>
               </li>
               <li>
@@ -90,6 +90,17 @@ const Sidebar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Stock Chart
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to="/tradeboard"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  TradeBoard
                 </NavLink>
               </li>
               <li>

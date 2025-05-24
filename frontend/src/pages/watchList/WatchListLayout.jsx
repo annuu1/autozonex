@@ -301,11 +301,11 @@ const WatchListLayout = () => {
               </Typography> */}
               <div>
                 <div>
-                  <StockChart symbol={selectedSymbol} />
+                  <StockChart ticker={selectedSymbol} />
                 </div>
                 <div className="flex">
-                  <StockChart symbol={selectedSymbol} timeFrame='1wk' />
-                  <StockChart symbol={selectedSymbol}  timeFrame='1mo' />
+                  <StockChart ticker={selectedSymbol} timeFrame='1wk' />
+                  <StockChart ticker={selectedSymbol}  timeFrame='1mo' />
                 </div>
               </div>
             </Box>

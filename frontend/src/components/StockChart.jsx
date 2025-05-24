@@ -2,18 +2,15 @@ import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { fetchZones, fetchCandles } from '../services/api';
 
-const StockChart = ({ ticker='TATAMOTORS', timeFrame='1d', selectedZone = null }) => {
+const StockChart = ({ ticker, timeFrame='1d', selectedZone = null }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
 
-  ticker = ticker.toUpperCase();
-  //check if ticket ends with .ns
-  if (!ticker.endsWith('.NS')) {
-    ticker += '.NS';
-  }
-
   useEffect(() => {
+    const symbol = ticker.toUpperCase().endsWith('.NS') ? ticker.toUpperCase() : `${ticker.toUpperCase()}.NS`;
+    console.log('Chart component mounted with ticker:', ticker);
+
     if (!chartContainerRef.current) return;
 
     const chart = createChart(chartContainerRef.current, {
@@ -55,7 +52,7 @@ const StockChart = ({ ticker='TATAMOTORS', timeFrame='1d', selectedZone = null }
     const loadChartData = async () => {
       try {
         // ✅ Fetch candles dynamically
-        const candles = await fetchCandles(ticker, timeFrame);
+        const candles = await fetchCandles(symbol, timeFrame);
         console.log('Fetched candles:', candles);
 
         // ✅ Set fetched candles on chart

@@ -1,4 +1,6 @@
-const API_BASE = '/api/watchList';
+import axios from 'axios';
+
+const API_BASE = `${import.meta.env.VITE_API_URL}/watchList` || "";
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -8,92 +10,98 @@ function getAuthHeaders() {
 }
 
 export async function getWatchLists() {
-  const res = await fetch(API_BASE, {
-    credentials: 'include',
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
-  if (!res.ok) throw new Error('Failed to fetch watchlists');
-  return res.json();
+  try {
+    const res = await axios.get(API_BASE, {
+      headers: getAuthHeaders(),
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to fetch watchlists');
+  }
 }
 
 export async function getWatchListById(id) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    credentials: 'include',
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
-  if (!res.ok) throw new Error('Failed to fetch watchlist');
-  return res.json();
+  try {
+    const res = await axios.get(`${API_BASE}/${id}`, {
+      headers: getAuthHeaders(),
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to fetch watchlist');
+  }
 }
 
 export async function createWatchList({ name, symbols }) {
-  const res = await fetch(API_BASE, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    },
-    credentials: 'include',
-    body: JSON.stringify({ name, symbols }),
-  });
-  if (!res.ok) throw new Error('Failed to create watchlist');
-  return res.json();
+  try {
+    const res = await axios.post(API_BASE, { name, symbols }, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to create watchlist');
+  }
 }
 
 export async function updateWatchList(id, { name, symbols }) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    },
-    credentials: 'include',
-    body: JSON.stringify({ name, symbols }),
-  });
-  if (!res.ok) throw new Error('Failed to update watchlist');
-  return res.json();
+  try {
+    const res = await axios.put(`${API_BASE}/${id}`, { name, symbols }, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to update watchlist');
+  }
 }
 
 export async function deleteWatchList(id) {
-  const res = await fetch(`${API_BASE}/${id}`, {
-    method: 'DELETE',
-    credentials: 'include',
-    headers: {
-      ...getAuthHeaders(),
-    },
-  });
-  if (!res.ok) throw new Error('Failed to delete watchlist');
-  return res.json();
+  try {
+    const res = await axios.delete(`${API_BASE}/${id}`, {
+      headers: getAuthHeaders(),
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to delete watchlist');
+  }
 }
 
 export async function addSymbolToWatchList(id, symbol) {
-  const res = await fetch(`${API_BASE}/${id}/symbols`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    },
-    credentials: 'include',
-    body: JSON.stringify({ symbol }),
-  });
-  if (!res.ok) throw new Error('Failed to add symbol to watchlist');
-  return res.json();
+  try {
+    const res = await axios.post(`${API_BASE}/${id}/symbols`, { symbol }, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to add symbol to watchlist');
+  }
 }
 
 export async function removeSymbolFromWatchList(id, symbol) {
-  const res = await fetch(`${API_BASE}/${id}/symbols`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      ...getAuthHeaders(),
-    },
-    credentials: 'include',
-    body: JSON.stringify({ symbol }),
-  });
-  if (!res.ok) throw new Error('Failed to remove symbol from watchlist');
-  return res.json();
+  try {
+    const res = await axios.delete(`${API_BASE}/${id}/symbols`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeaders(),
+      },
+      
+      data: { symbol },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to remove symbol from watchlist');
+  }
 }
-

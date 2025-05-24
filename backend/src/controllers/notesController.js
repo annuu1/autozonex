@@ -4,7 +4,7 @@ const Note = require('../models/Note');
 exports.getNotes = async (req, res) => {
   try {
     const userId = req.user.id; // assuming user is attached to req
-    const notes = await Note.find({ user: userId }).sort({ createdAt: -1 });
+    const notes = await Note.find({ userId: userId }).sort({ createdAt: -1 });
     res.json(notes);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch notes' });
@@ -15,7 +15,7 @@ exports.getNotes = async (req, res) => {
 exports.getNoteById = async (req, res) => {
   try {
     const userId = req.user.id;
-    const note = await Note.findOne({ _id: req.params.id, user: userId });
+    const note = await Note.findOne({ _id: req.params.id, userId: userId });
     if (!note) return res.status(404).json({ error: 'Note not found' });
     res.json(note);
   } catch (err) {
@@ -28,7 +28,7 @@ exports.createNote = async (req, res) => {
   try {
     const userId = req.user.id;
     const { title, content } = req.body;
-    const note = new Note({ user: userId, title, content });
+    const note = new Note({ userId: userId, title, content });
     await note.save();
     res.status(201).json(note);
   } catch (err) {
@@ -42,7 +42,7 @@ exports.updateNote = async (req, res) => {
     const userId = req.user.id;
     const { title, content } = req.body;
     const note = await Note.findOneAndUpdate(
-      { _id: req.params.id, user: userId },
+      { _id: req.params.id, userId: userId },
       { title, content },
       { new: true }
     );
@@ -57,7 +57,7 @@ exports.updateNote = async (req, res) => {
 exports.deleteNote = async (req, res) => {
   try {
     const userId = req.user.id;
-    const note = await Note.findOneAndDelete({ _id: req.params.id, user: userId });
+    const note = await Note.findOneAndDelete({ _id: req.params.id, userId: userId });
     if (!note) return res.status(404).json({ error: 'Note not found' });
     res.json({ message: 'Note deleted successfully' });
   } catch (err) {

@@ -11,6 +11,8 @@ import ProtectedRoute from './components/routes/ProtectedRoute';
 import TradeJournal from './pages/tradeJournal/TradeJournal';
 import Settings from './pages/settings/Settings';
 import TradeBoard from './pages/tradeBoard/TradeBoard';
+import AddNote from './components/dialogs/AddNote';
+import Note from './pages/note/Note';
 
 const App = () => {
   return (
@@ -112,6 +114,16 @@ const App = () => {
         <MainLayout>
           <ProtectedRoute>
             <TradeJournal />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+      <Route
+      path = "/notes"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <Note />
           </ProtectedRoute>
         </MainLayout>
       }

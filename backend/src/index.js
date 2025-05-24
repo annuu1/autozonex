@@ -43,6 +43,7 @@ app.use('/api/users', require('./routes/usersRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/trade-journal', require('./routes/tradeJournalRoutes'))
 app.use('/api/settings', require('./routes/settingsRoutes'));
+app.use('/api/notes', require('./routes/notesRoutes'));
 // app.use('/api/watchlist', require('./routes/watchlist'));
 
 // Error handling

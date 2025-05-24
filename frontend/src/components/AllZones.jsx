@@ -3,6 +3,7 @@ import { fetchAllZones } from '../services/api';
 import StockChart from './StockChart';
 import { formatDate } from '../utils/formatDate';
 import { formatNumber } from '../utils/formatNumber';
+import { getDailyDemandZones } from '../api/zone';
 
 const AllZones = () => {
   const [ticker, setTicker] = useState('RELIANCE.NS');
@@ -14,6 +15,9 @@ const AllZones = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [filterType, setFilterType] = useState('all');
   const [selectedZone, setSelectedZone] = useState(null);
+
+  const [targetDate, setTargetDate] = useState('');
+
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -62,9 +66,51 @@ const AllZones = () => {
     }
   };
 
+
+  const handleFetchDemandZones = async () => {
+    if (!targetDate) {
+      alert('Please select a target date');
+      return;
+    }
+  
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getDailyDemandZones(targetDate);
+      console.log('Fetched daily demand zones:', data);
+      setZones(data);
+      setPage(1);
+      setTotalPages(1);
+    } catch (err) {
+      console.error('Error fetching daily demand zones:', err);
+      setError(err.message || 'Failed to load daily demand zones');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  
+
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
+
+      <div className="flex gap-4 mb-4">
+  <input
+    type="date"
+    value={targetDate}
+    onChange={(e) => setTargetDate(e.target.value)}
+    className="border p-2 rounded"
+  />
+  <button
+    onClick={handleFetchDemandZones}
+    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+  >
+    Fetch Demand Zones
+  </button>
+</div>
+
 
       {loading && (
         <div className="flex justify-center my-4">

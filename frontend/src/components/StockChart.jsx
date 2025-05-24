@@ -64,7 +64,7 @@ const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `Top (${selectedZone.pattern})`,
+            title: `(${selectedZone.pattern})`,
           });
           candlestickSeries.createPriceLine({
             price: selectedZone.distalLine,
@@ -72,12 +72,12 @@ const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `Bottom (${selectedZone.pattern})`,
+            title: `(${selectedZone.pattern})`,
           });
           
         }else{
           const fetchedZones = await fetchZones(ticker, timeFrame);
-        console.log('Fetched zones:', fetchedZones);
+        // console.log('Fetched zones:', fetchedZones);
 
         fetchedZones.forEach(zone => {
           if(zone.freshness > 0){

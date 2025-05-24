@@ -64,6 +64,12 @@ const getDailyDemandZones = async (req, res) => {
     const { timeFrame = '1d', tickers,targetDate } = req.query;
     const tickerList = tickers ? tickers.split(',') : undefined;
 
+    //validate user, allow only if user is admin
+    const user = req.user;
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+
     // Validate timeFrame
     if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
       return res.status(400).json({ message: 'Invalid timeFrame. Use 1d, 1wk, or 1mo.' });

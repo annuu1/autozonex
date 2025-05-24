@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import StockChart from '../../components/StockChart';
 import {
   Box,
@@ -33,6 +33,10 @@ import {
   updateWatchList,
 } from '../../api/watchList';
 
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+
+
 const WatchListLayout = () => {
   const [watchLists, setWatchLists] = useState([]);
   const [selectedWatchListIdx, setSelectedWatchListIdx] = useState(0);
@@ -46,6 +50,10 @@ const WatchListLayout = () => {
   const [editSymbols, setEditSymbols] = useState('');
   const [symbolInput, setSymbolInput] = useState('');
   const [symbolAddError, setSymbolAddError] = useState('');
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+const fullscreenRef = useRef(null);
+
 
   // Fetch watchlists
   const fetchWatchLists = async () => {
@@ -138,6 +146,27 @@ const WatchListLayout = () => {
   const selectedWatchList = watchLists[selectedWatchListIdx] || {};
   const symbols = selectedWatchList.symbols || [];
   const selectedSymbol = symbols[selectedSymbolIdx] || null;
+
+  //toggle fullscreen
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      fullscreenRef.current.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey && e.key === 'f') || e.key === 'F' || e.key === 'f') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <Box className="flex flex-col h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
@@ -290,30 +319,31 @@ const WatchListLayout = () => {
         </Paper>
         {/* Symbol Details */}
         <Box className="flex-1 p-6 overflow-y-auto">
-          {selectedSymbol ? (
-            <Box>
-              <Typography variant="h5" gutterBottom>
-                {selectedSymbol}
-              </Typography>
-              <Divider className="mb-4" />
-              {/*<Typography variant="body1">
-                Details for <b>{selectedSymbol}</b> will appear here.
-              </Typography> */}
-              <div>
-                <div>
-                  <StockChart ticker={selectedSymbol} />
-                </div>
-                <div className="flex">
-                  <StockChart ticker={selectedSymbol} timeFrame='1wk' />
-                  <StockChart ticker={selectedSymbol}  timeFrame='1mo' />
-                </div>
-              </div>
-            </Box>
-          ) : (
-            <Typography className="text-gray-400">
-              Select a symbol to see details
-            </Typography>
-          )}
+        {selectedSymbol ? (
+  <Box ref={fullscreenRef} className={`relative ${isFullscreen ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto' : ''}`}>
+    <Box className="flex justify-between items-center mb-4">
+      <Typography variant="h5">{selectedSymbol}</Typography>
+      <IconButton onClick={toggleFullscreen}>
+        {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+      </IconButton>
+    </Box>
+    <Divider className="mb-4" />
+    <div>
+      <div>
+        <StockChart ticker={selectedSymbol} />
+      </div>
+      <div className="flex flex-col md:flex-row gap-4 mt-6">
+        <StockChart ticker={selectedSymbol} timeFrame="1wk" />
+        <StockChart ticker={selectedSymbol} timeFrame="1mo" />
+      </div>
+    </div>
+  </Box>
+) : (
+  <Typography className="text-gray-400">
+    Select a symbol to see details
+  </Typography>
+)}
+
         </Box>
       </Box>
 

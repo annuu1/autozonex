@@ -36,7 +36,6 @@ import {
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
-
 const WatchListLayout = () => {
   const [watchLists, setWatchLists] = useState([]);
   const [selectedWatchListIdx, setSelectedWatchListIdx] = useState(0);
@@ -52,8 +51,7 @@ const WatchListLayout = () => {
   const [symbolAddError, setSymbolAddError] = useState('');
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-const fullscreenRef = useRef(null);
-
+  const fullscreenRef = useRef(null);
 
   // Fetch watchlists
   const fetchWatchLists = async () => {
@@ -319,31 +317,38 @@ const fullscreenRef = useRef(null);
         </Paper>
         {/* Symbol Details */}
         <Box className="flex-1 p-6 overflow-y-auto">
-        {selectedSymbol ? (
-  <Box ref={fullscreenRef} className={`relative ${isFullscreen ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto' : ''}`}>
-    <Box className="flex justify-between items-center mb-4">
-      <Typography variant="h5">{selectedSymbol}</Typography>
-      <IconButton onClick={toggleFullscreen}>
-        {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-      </IconButton>
-    </Box>
-    <Divider className="mb-4" />
-    <div>
-      <div>
-        <StockChart ticker={selectedSymbol} />
-      </div>
-      <div className="flex flex-col md:flex-row gap-4 mt-6">
-        <StockChart ticker={selectedSymbol} timeFrame="1wk" />
-        <StockChart ticker={selectedSymbol} timeFrame="1mo" />
-      </div>
-    </div>
-  </Box>
-) : (
-  <Typography className="text-gray-400">
-    Select a symbol to see details
-  </Typography>
-)}
-
+          {selectedSymbol ? (
+            <Box
+            ref={fullscreenRef}
+            className={`relative ${
+              isFullscreen
+                ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto'
+                : 'max-w-6xl mx-auto w-full'
+            }`}
+          >
+            <Box className="flex justify-between items-center">
+              <Typography variant="h5">{selectedSymbol}</Typography>
+              <IconButton onClick={toggleFullscreen}>
+                {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+              </IconButton>
+            </Box>
+            <Divider className="mb-4" />
+            <div>
+              <div>
+                <StockChart ticker={selectedSymbol} />
+              </div>
+              <div className="flex flex-col md:flex-row gap-4 mt-6">
+                <StockChart ticker={selectedSymbol} timeFrame="1wk" />
+                <StockChart ticker={selectedSymbol} timeFrame="1mo" />
+              </div>
+            </div>
+          </Box>
+          
+          ) : (
+            <Typography className="text-gray-400">
+              Select a symbol to see details
+            </Typography>
+          )}
         </Box>
       </Box>
 

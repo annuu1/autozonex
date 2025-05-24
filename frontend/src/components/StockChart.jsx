@@ -2,10 +2,16 @@ import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { fetchZones, fetchCandles } from '../services/api';
 
-const StockChart = ({ ticker, timeFrame, selectedZone = null }) => {
+const StockChart = ({ ticker='TATAMOTORS', timeFrame='1d', selectedZone = null }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
+
+  ticker = ticker.toUpperCase();
+  //check if ticket ends with .ns
+  if (!ticker.endsWith('.NS')) {
+    ticker += '.NS';
+  }
 
   useEffect(() => {
     if (!chartContainerRef.current) return;

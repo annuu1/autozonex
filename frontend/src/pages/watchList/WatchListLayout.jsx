@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import StockChart from '../../components/StockChart';
 import {
   Box,
   Tabs,
@@ -123,7 +124,10 @@ const WatchListLayout = () => {
       return;
     }
     try {
-      await addSymbolToWatchList(selectedWatchList._id || selectedWatchList.id, symbol);
+      await addSymbolToWatchList(
+        selectedWatchList._id || selectedWatchList.id,
+        symbol
+      );
       setSymbolInput('');
       fetchWatchLists();
     } catch (err) {
@@ -138,7 +142,10 @@ const WatchListLayout = () => {
   return (
     <Box className="flex flex-col h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
       {/* Tabs for Watchlists */}
-      <Paper elevation={0} className="border-b border-gray-200 bg-gray-50 flex items-center justify-between px-4">
+      <Paper
+        elevation={0}
+        className="border-b border-gray-200 bg-gray-50 flex items-center justify-between px-4"
+      >
         <Tabs
           value={selectedWatchListIdx}
           onChange={handleTabChange}
@@ -208,7 +215,10 @@ const WatchListLayout = () => {
               Symbols
             </Typography>
             {watchLists.length > 0 && (
-              <form onSubmit={handleAddSymbol} className="flex items-center gap-2">
+              <form
+                onSubmit={handleAddSymbol}
+                className="flex items-center gap-2"
+              >
                 <TextField
                   size="small"
                   label="Add Symbol"
@@ -254,15 +264,18 @@ const WatchListLayout = () => {
                     selected={idx === selectedSymbolIdx}
                     onClick={() => handleSymbolSelect(idx)}
                     className={`!rounded-none !pl-6 !pr-4 !py-2
-                      ${idx === selectedSymbolIdx
-                        ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
-                        : 'border-l-4 border-transparent'}
+                      ${
+                        idx === selectedSymbolIdx
+                          ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
+                          : 'border-l-4 border-transparent'
+                      }
                     `}
                   >
                     <ListItemText
                       primary={symbol}
                       primaryTypographyProps={{
-                        className: idx === selectedSymbolIdx ? 'font-semibold' : '',
+                        className:
+                          idx === selectedSymbolIdx ? 'font-semibold' : '',
                       }}
                     />
                   </ListItemButton>
@@ -283,12 +296,23 @@ const WatchListLayout = () => {
                 {selectedSymbol}
               </Typography>
               <Divider className="mb-4" />
-              <Typography variant="body1">
+              {/*<Typography variant="body1">
                 Details for <b>{selectedSymbol}</b> will appear here.
-              </Typography>
+              </Typography> */}
+              <div>
+                <div>
+                  <StockChart symbol={selectedSymbol} />
+                </div>
+                <div className="flex">
+                  <StockChart symbol={selectedSymbol} timeFrame='1wk' />
+                  <StockChart symbol={selectedSymbol}  timeFrame='1mo' />
+                </div>
+              </div>
             </Box>
           ) : (
-            <Typography className="text-gray-400">Select a symbol to see details</Typography>
+            <Typography className="text-gray-400">
+              Select a symbol to see details
+            </Typography>
           )}
         </Box>
       </Box>

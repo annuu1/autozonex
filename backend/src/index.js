@@ -45,7 +45,7 @@ app.use('/api/trade-journal', require('./routes/tradeJournalRoutes'))
 app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/notes', require('./routes/notesRoutes'));
 app.use('/api/symbols', require('./routes/symbolsRoutes'));
-// app.use('/api/watchlist', require('./routes/watchlist'));
+app.use('/api/watchList', require('./routes/watchListRoutes'));
 
 // Error handling
 app.use((err, req, res, next) => {

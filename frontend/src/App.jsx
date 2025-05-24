@@ -13,6 +13,7 @@ import Settings from './pages/settings/Settings';
 import TradeBoard from './pages/tradeBoard/TradeBoard';
 import AddNote from './components/dialogs/AddNote';
 import Note from './pages/note/Note';
+import WatchList from './pages/watchList/WatchList';
 
 const App = () => {
   return (
@@ -92,7 +93,7 @@ const App = () => {
           element={
             <MainLayout>
               <ProtectedRoute>
-                <h1>Watch list</h1>
+                <WatchList/>
               </ProtectedRoute>
             </MainLayout>
           }

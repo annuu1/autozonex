@@ -265,85 +265,86 @@ const WatchListLayout = () => {
               {symbolAddError}
             </Typography>
           )}
-          <List disablePadding>
-            {symbols.length > 0 ? (
-              symbols.map((symbol, idx) => (
-                <ListItem
-                  key={symbol}
-                  disablePadding
-                  className="!block"
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={async () => {
-                        await removeSymbolFromWatchList(
-                          selectedWatchList._id || selectedWatchList.id,
-                          symbol
-                        );
-                        fetchWatchLists();
-                      }}
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  }
-                >
-                  <ListItemButton
-                    selected={idx === selectedSymbolIdx}
-                    onClick={() => handleSymbolSelect(idx)}
-                    className={`!rounded-none !pl-6 !pr-4 !py-2
-                      ${
-                        idx === selectedSymbolIdx
-                          ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
-                          : 'border-l-4 border-transparent'
-                      }
-                    `}
+          <Box sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+            <List disablePadding>
+              {symbols.length > 0 ? (
+                symbols.map((symbol, idx) => (
+                  <ListItem
+                    key={symbol}
+                    disablePadding
+                    className="!block"
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        onClick={async () => {
+                          await removeSymbolFromWatchList(
+                            selectedWatchList._id || selectedWatchList.id,
+                            symbol
+                          );
+                          fetchWatchLists();
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    }
                   >
-                    <ListItemText
-                      primary={symbol}
-                      primaryTypographyProps={{
-                        className:
-                          idx === selectedSymbolIdx ? 'font-semibold' : '',
-                      }}
-                    />
-                  </ListItemButton>
+                    <ListItemButton
+                      selected={idx === selectedSymbolIdx}
+                      onClick={() => handleSymbolSelect(idx)}
+                      className={`!rounded-none !pl-6 !pr-4 !py-2
+                ${
+                  idx === selectedSymbolIdx
+                    ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
+                    : 'border-l-4 border-transparent'
+                }
+              `}
+                    >
+                      <ListItemText
+                        primary={symbol}
+                        primaryTypographyProps={{
+                          className:
+                            idx === selectedSymbolIdx ? 'font-semibold' : '',
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))
+              ) : (
+                <ListItem className="!pl-6 !py-4 text-gray-400">
+                  <ListItemText primary="No symbols" />
                 </ListItem>
-              ))
-            ) : (
-              <ListItem className="!pl-6 !py-4 text-gray-400">
-                <ListItemText primary="No symbols" />
-              </ListItem>
-            )}
-          </List>
+              )}
+            </List>
+          </Box>
         </Paper>
         {/* Symbol Details */}
         <Box className="flex-1 p-6 overflow-y-auto">
           {selectedSymbol ? (
             <Box
-            ref={fullscreenRef}
-            className={`relative ${
-              isFullscreen
-                ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto'
-                : 'max-w-6xl mx-auto w-full'
-            }`}
-          >
-            <Box className="flex justify-between items-center">
-              <Typography variant="h5">{selectedSymbol}</Typography>
-              <IconButton onClick={toggleFullscreen}>
-                {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-              </IconButton>
-            </Box>
-            <Divider className="mb-4" />
-            <div>
+              ref={fullscreenRef}
+              className={`relative ${
+                isFullscreen
+                  ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto'
+                  : 'max-w-6xl mx-auto w-full'
+              }`}
+            >
+              <Box className="flex justify-between items-center">
+                <Typography variant="h5">{selectedSymbol}</Typography>
+                <IconButton onClick={toggleFullscreen}>
+                  {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              </Box>
+              <Divider className="mb-4" />
               <div>
-                <StockChart ticker={selectedSymbol} />
+                <div>
+                  <StockChart ticker={selectedSymbol} />
+                </div>
+                <div className="flex flex-col md:flex-row gap-4 mt-6">
+                  <StockChart ticker={selectedSymbol} timeFrame="1wk" />
+                  <StockChart ticker={selectedSymbol} timeFrame="1mo" />
+                </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-4 mt-6">
-                <StockChart ticker={selectedSymbol} timeFrame="1wk" />
-                <StockChart ticker={selectedSymbol} timeFrame="1mo" />
-              </div>
-            </div>
-          </Box>
-          
+            </Box>
           ) : (
             <Typography className="text-gray-400">
               Select a symbol to see details

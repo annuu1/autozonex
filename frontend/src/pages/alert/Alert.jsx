@@ -165,7 +165,7 @@ const Alert = () => {
                 <ListItemText
                   primary={
                     <span className="font-semibold">
-                      {alert.ticker} {alert.condition} {alert.alertAlertPrice}
+                      {alert.ticker} {alert.condition} {alert.alertPrice}
                     </span> 
                   }
                   secondary={alert.note && <span className="text-gray-500">{alert.note}</span>}

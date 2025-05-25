@@ -79,7 +79,7 @@ const Alert = () => {
   const handleEdit = (alert) => {
     setSelectedAlert(alert);
     setTicker(alert.ticker);
-    setCondition(alert.condition);
+    setCondition(toProperCase(alert.condition));
     setAlertPrice(alert.alertPrice);
     setNote(alert.note || "");
     setEditDialogOpen(true);
@@ -132,6 +132,12 @@ const Alert = () => {
     setDeleteDialogOpen(false);
     setSelectedAlert(null);
   };
+
+  function toProperCase(str) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+  
 
   return (
     <Box className="flex flex-col items-center w-full min-h-screen bg-gray-50 py-8">

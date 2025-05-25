@@ -1,5 +1,6 @@
 import axios from "axios";
 const GSHEETS_API =  import.meta.env.VITE_GSHEETS_API;
+import { useAuth } from "../hooks/useAuth";
 
 // CRUD functions for alert management via GSHEETS_API
 
@@ -19,8 +20,9 @@ export async function createAlert({ ticker, alertPrice, condition, userEmail, te
 }
 
 // Get all alerts
-export async function getAlerts() {
-  const response = await axios.get(GSHEETS_API);
+export async function getAlerts(email) {
+  const params = new URLSearchParams({userEmail:email});
+  const response = await axios.get(`${GSHEETS_API}?${params.toString()}`);
   return response.data;
 }
 

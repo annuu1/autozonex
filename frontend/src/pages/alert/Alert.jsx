@@ -23,22 +23,23 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
-import { getAlerts } from "../../api/alert";
+import { createAlert, getAlerts } from "../../api/alert";
+import {useAuth} from "../../hooks/useAuth"
 
 // Dummy data and functions for demonstration
 const dummyAlerts = [
   {
     id: 1,
-    symbol: "AAPL",
+    ticker: "AAPL",
     condition: "Above",
-    price: 180,
+    alertPrice: 180,
     note: "Breakout watch",
   },
   {
     id: 2,
-    symbol: "TSLA",
+    ticker: "TSLA",
     condition: "Below",
-    price: 600,
+    alertPrice: 600,
     note: "",
   },
 ];
@@ -51,15 +52,16 @@ const Alert = () => {
   const [selectedAlert, setSelectedAlert] = useState(null);
 
   // Form state
-  const [symbol, setSymbol] = useState("");
+  const [ticker, setTicker] = useState("");
   const [condition, setCondition] = useState("Above");
-  const [price, setPrice] = useState("");
+  const [alertPrice, setAlertPrice] = useState("");
   const [note, setNote] = useState("");
+  const {user} = useAuth(); 
 
   useEffect(() => {
     // Replace with API call
     const fetchAlerts = async ()=>{
-        const alerts = await getAlerts()
+        const alerts = await getAlerts(user.email)
         setAlerts(alerts.data.alerts)
     }
     fetchAlerts()
@@ -67,18 +69,18 @@ const Alert = () => {
   }, []);
 
   const handleAdd = () => {
-    setSymbol("");
-    setCondition("Above");
-    setPrice("");
+    setTicker("");
+    setCondition("Below");
+    setAlertPrice("");
     setNote("");
     setAddDialogOpen(true);
   };
 
   const handleEdit = (alert) => {
     setSelectedAlert(alert);
-    setSymbol(alert.symbol);
+    setTicker(alert.ticker);
     setCondition(alert.condition);
-    setPrice(alert.price);
+    setAlertPrice(alert.alertPrice);
     setNote(alert.note || "");
     setEditDialogOpen(true);
   };
@@ -90,17 +92,25 @@ const Alert = () => {
 
   const handleAddSubmit = () => {
     // Replace with API call
-    setAlerts([
-      ...alerts,
-      {
-        id: Date.now(),
-        symbol,
-        condition,
-        price: parseFloat(price),
-        note,
-      },
-    ]);
-    setAddDialogOpen(false);
+    const addAlert = async()=>{
+        const alert = await createAlert({userEmail : user.email, ticker, condition,alertPrice: parseFloat(alertPrice), note});
+        if(alert.success){
+          setAlerts([
+            ...alerts,
+            {
+              id: Date.now(),
+              ticker,
+              condition,
+              alertPrice: parseFloat(alertPrice),
+              note,
+            },
+          ]);
+          setAddDialogOpen(false);
+        }else{
+          window.alert(alert.message)
+        }
+    }
+    addAlert();
   };
 
   const handleEditSubmit = () => {
@@ -108,7 +118,7 @@ const Alert = () => {
     setAlerts(
       alerts.map((a) =>
         a.id === selectedAlert.id
-          ? { ...a, ticker, condition, alertPrice: parseFloat(price), note }
+          ? { ...a, ticker, condition, alertAlertPrice: parseFloat(alertPrice), note }
           : a
       )
     );
@@ -155,7 +165,7 @@ const Alert = () => {
                 <ListItemText
                   primary={
                     <span className="font-semibold">
-                      {alert.ticker} {alert.condition} {alert.alertPrice}
+                      {alert.ticker} {alert.condition} {alert.alertAlertPrice}
                     </span> 
                   }
                   secondary={alert.note && <span className="text-gray-500">{alert.note}</span>}
@@ -187,9 +197,9 @@ const Alert = () => {
         <DialogTitle>Add New Alert</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-2">
           <TextField
-            label="Symbol"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            label="Ticker"
+            value={ticker}
+            onChange={(e) => setTicker(e.target.value.toUpperCase())}
             fullWidth
             autoFocus
           />
@@ -205,10 +215,10 @@ const Alert = () => {
             </Select>
           </FormControl>
           <TextField
-            label="Price"
+            label="AlertPrice"
             type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            value={alertPrice}
+            onChange={(e) => setAlertPrice(e.target.value)}
             fullWidth
           />
           <TextField
@@ -225,7 +235,7 @@ const Alert = () => {
           <Button
             onClick={handleAddSubmit}
             variant="contained"
-            disabled={!symbol || !price}
+            disabled={!ticker || !alertPrice}
           >
             Add
           </Button>
@@ -237,9 +247,9 @@ const Alert = () => {
         <DialogTitle>Edit Alert</DialogTitle>
         <DialogContent className="flex flex-col gap-4 pt-2">
           <TextField
-            label="Symbol"
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            label="Ticker"
+            value={ticker}
+            onChange={(e) => setTicker(e.target.value.toUpperCase())}
             fullWidth
             autoFocus
           />
@@ -255,10 +265,10 @@ const Alert = () => {
             </Select>
           </FormControl>
           <TextField
-            label="Price"
+            label="AlertPrice"
             type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            value={alertPrice}
+            onChange={(e) => setAlertPrice(e.target.value)}
             fullWidth
           />
           <TextField
@@ -275,7 +285,7 @@ const Alert = () => {
           <Button
             onClick={handleEditSubmit}
             variant="contained"
-            disabled={!symbol || !price}
+            disabled={!ticker || !alertPrice}
           >
             Save
           </Button>
@@ -288,7 +298,7 @@ const Alert = () => {
         <DialogContent>
           <Typography>
             Are you sure you want to delete this alert for{" "}
-            <span className="font-semibold">{selectedAlert?.symbol}</span>?
+            <span className="font-semibold">{selectedAlert?.ticker}</span>?
           </Typography>
         </DialogContent>
         <DialogActions>

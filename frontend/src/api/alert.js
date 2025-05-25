@@ -1,6 +1,5 @@
 import axios from "axios";
-const GSHEETS_API =  import.meta.env.VITE_GSHEETS_API;
-import { useAuth } from "../hooks/useAuth";
+const GSHEETS_API =  import.meta.env.VITE_GSHEETS_API || "https://script.google.com/macros/s/AKfycbwe2mzjBPW4LG90BLyoCFSCU7NeEq6lCr0GE4ZUXafDtZ6u0Tl8BzHIjqR77te_cJeJ/exec";
 
 // CRUD functions for alert management via GSHEETS_API
 

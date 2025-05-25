@@ -23,6 +23,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import { getAlerts } from "../../api/alert";
 
 // Dummy data and functions for demonstration
 const dummyAlerts = [
@@ -57,7 +58,12 @@ const Alert = () => {
 
   useEffect(() => {
     // Replace with API call
-    setAlerts(dummyAlerts);
+    const fetchAlerts = async ()=>{
+        const alerts = await getAlerts()
+        setAlerts(alerts.data.alerts)
+    }
+    fetchAlerts()
+    // setAlerts(dummyAlerts);
   }, []);
 
   const handleAdd = () => {
@@ -102,7 +108,7 @@ const Alert = () => {
     setAlerts(
       alerts.map((a) =>
         a.id === selectedAlert.id
-          ? { ...a, symbol, condition, price: parseFloat(price), note }
+          ? { ...a, ticker, condition, alertPrice: parseFloat(price), note }
           : a
       )
     );
@@ -149,8 +155,8 @@ const Alert = () => {
                 <ListItemText
                   primary={
                     <span className="font-semibold">
-                      {alert.symbol} {alert.condition} ${alert.price}
-                    </span>
+                      {alert.ticker} {alert.condition} {alert.alertPrice}
+                    </span> 
                   }
                   secondary={alert.note && <span className="text-gray-500">{alert.note}</span>}
                 />

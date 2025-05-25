@@ -94,6 +94,17 @@ const Sidebar = () => {
               </li>
               <li>
                 <NavLink
+                  to="/alerts"
+                  className={({ isActive }) =>
+                    `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  Alerts
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
                   to="/tradeboard"
                   className={({ isActive }) =>
                     `block p-2 rounded ${isActive ? 'bg-blue-600' : 'hover:bg-gray-700'}`

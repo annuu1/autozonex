@@ -90,7 +90,6 @@ const PriceActions = () => {
         <AddPriceActionForm
           onSubmit={handleAddNew}
           onCancel={() => setOpenDialog(false)}
-          priceAction={selected}
         />
       </ModalDialog>
     </>

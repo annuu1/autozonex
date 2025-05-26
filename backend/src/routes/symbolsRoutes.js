@@ -21,5 +21,8 @@ router.delete('/:id', auth, symbolsController.deleteSymbol);
 // Add multiple symbols at once (protected)
 router.post('/bulk', auth, symbolsController.addMultipleSymbols);
 
+//search symbols
+router.get('/search/:term', symbolsController.searchSymbols);
+
 module.exports = router;
 

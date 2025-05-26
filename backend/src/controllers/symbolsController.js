@@ -82,3 +82,26 @@ exports.addMultipleSymbols = async (req, res) => {
     res.status(400).json({ error: err.message || 'Failed to create symbols' });
   }
 }
+
+// Search symbols by term (symbol or name)
+exports.searchSymbols = async (req, res) => {
+  try {
+    const { term } = req.params;
+    if (!term || term.trim() === "") {
+      return res.status(400).json({ error: "Search term is required" });
+    }
+
+    // Case-insensitive partial match on symbol or name
+    const regex = new RegExp(term, "i");
+    const results = await Symbol.find({
+      $or: [
+        { symbol: regex },
+        { name: regex }
+      ]
+    }).limit(10); // Limit results for performance
+
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to search symbols" });
+  }
+};

@@ -54,6 +54,12 @@ const PriceActions = () => {
         EMA Alignment: {item.current_EMA_alignment}
       </p>
       <p className="text-gray-600">Notes: {item.notes}</p>
+      <AddPriceActionForm
+        initialData={item}
+        onSubmit={handleAddNew}
+        onCancel={() => setSelected(null)}
+        priceAction={selected}
+      />
     </div>
   );
 
@@ -84,6 +90,7 @@ const PriceActions = () => {
         <AddPriceActionForm
           onSubmit={handleAddNew}
           onCancel={() => setOpenDialog(false)}
+          priceAction={selected}
         />
       </ModalDialog>
     </>

@@ -46,6 +46,7 @@ app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/notes', require('./routes/notesRoutes'));
 app.use('/api/symbols', require('./routes/symbolsRoutes'));
 app.use('/api/watchList', require('./routes/watchListRoutes'));
+app.use('/api/priceActions', require('./routes/priceActionRoutes'));
 
 // Error handling
 app.use((err, req, res, next) => {

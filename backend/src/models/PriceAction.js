@@ -35,6 +35,9 @@ const PriceActionSchema = new mongoose.Schema({
       },
     },
   ],
+  participants:[{
+    user:{type:mongoose.Schema.Types.ObjectId, ref: "User" }
+  }],
   confidence_score: { type: Number, min: 1, max: 10 },
   key_levels: [
     {

@@ -1,73 +1,38 @@
-import React, { useState } from 'react';
-import { List, ListItem, ListItemButton, ListItemText, Divider, Paper, Typography, Box } from '@mui/material';
+import React from "react";
 
-const ItemDetailsLayout = ({ items, renderItem, renderDetails, listHeader = "Items" }) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
-
-  const handleSelect = (idx) => {
-    setSelectedIndex(idx);
-  };
-
+const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails }) => {
   return (
-    <div className="flex h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
-      {/* Left: Items List */}
-      <Paper
-        elevation={0}
-        className="w-64 border-r border-gray-200 bg-gray-50"
-        square
-      >
-        <div className="px-4 py-3 border-b border-gray-200 bg-gray-100">
-          <Typography variant="h6" className="!font-semibold !text-base">
-            {listHeader}
-          </Typography>
-        </div>
-        <List disablePadding>
-          {items && items.length > 0 ? (
-            items.map((item, idx) => (
-              <ListItem
-                key={item.id || idx}
-                disablePadding
-                className="!block"
-              >
-                <ListItemButton
-                  selected={idx === selectedIndex}
-                  onClick={() => handleSelect(idx)}
-                  className={`!rounded-none !pl-6 !pr-4 !py-2
-                    ${idx === selectedIndex
-                      ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
-                      : 'border-l-4 border-transparent'}
-                  `}
-                >
-                  <ListItemText
-                    primary={
-                      renderItem
-                        ? renderItem(item)
-                        : (item.name || item.title || `Item ${idx + 1}`)
-                    }
-                    primaryTypographyProps={{
-                      className: idx === selectedIndex ? 'font-semibold' : ''
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))
-          ) : (
-            <ListItem className="!pl-6 !py-4 text-gray-400">
-              <ListItemText primary="No items" />
-            </ListItem>
-          )}
-        </List>
-      </Paper>
-      {/* Right: Details */}
-      <Box className="flex-1 p-6 overflow-y-auto">
-        {items && items.length > 0 && renderDetails
-          ? renderDetails(items[selectedIndex])
-          : <Typography className="text-gray-400">Select an item to see details</Typography>
-        }
-      </Box>
+    <div className="flex h-screen w-full bg-gray-50">
+      {/* Left List Section */}
+      <div className="w-1/3 border-r border-gray-300 overflow-y-auto p-4 bg-white">
+        <h2 className="text-xl font-semibold mb-4">Price Action Logs</h2>
+        <ul className="space-y-2">
+          {items.map((item) => (
+            <li
+              key={item._id}
+              onClick={() => onSelect(item)}
+              className={`p-3 rounded-lg cursor-pointer transition ${
+                selectedItem?._id === item._id
+                  ? "bg-blue-100 font-semibold"
+                  : "hover:bg-gray-100"
+              }`}
+            >
+              {item.symbol}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Right Detail Section */}
+      <div className="w-2/3 overflow-y-auto p-6">
+        {selectedItem ? (
+          renderDetails(selectedItem)
+        ) : (
+          <p className="text-gray-500">Select a stock to view details.</p>
+        )}
+      </div>
     </div>
   );
 };
 
-export default ItemDetailsLayout;
-
+export default ListItemLayout;

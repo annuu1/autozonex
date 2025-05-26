@@ -15,6 +15,7 @@ import AddNote from './components/dialogs/AddNote';
 import Note from './pages/note/Note';
 import WatchList from './pages/watchList/WatchList';
 import Alert from './pages/alert/Alert';
+import PriceActions from './pages/priceAction/PriceActions';
 
 const App = () => {
   return (
@@ -136,6 +137,16 @@ const App = () => {
         <MainLayout>
           <ProtectedRoute>
             <Alert />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+      <Route
+      path = "/price-actions"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <PriceActions />
           </ProtectedRoute>
         </MainLayout>
       }

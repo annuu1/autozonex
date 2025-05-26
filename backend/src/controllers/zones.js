@@ -43,6 +43,7 @@ const getAllDemandZones = async (req, res) => {
     const skip = (page - 1) * limit;
 
     const zones = await Zone.find({})
+    .sort({ legOutDate: -1 })
       .skip(skip)
       .limit(limit);
 

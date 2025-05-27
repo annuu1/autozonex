@@ -8,7 +8,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
 
   // Form state
   const [formData, setFormData] = useState({
-    symbol: '', // symbol id
+    symbol: '',
     follows_demand_supply: false,
     trend_direction_HTF: '',
     current_EMA_alignment: '',
@@ -27,10 +27,11 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         reason_price_reached_here: ''
       }
     ],
-    key_levels: [],
-    trade_setups: [],
-    positives: [],
-    negatives: []
+    key_levels: [{ level_type: '', price: '' }],
+    trade_setups: [''],
+    positives: [''],
+    negatives: [''],
+    participants: [{ user: '' }], // Initialize participants to avoid undefined errors
   });
 
   // Timeframe fields state
@@ -98,29 +99,22 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const selected = symbolOptions.find((sym) => sym.symbol === symbolInput);
-
     if (!selected && !priceAction) {
       alert('Please select a valid symbol from suggestions.');
       return;
     }
-
-    // Clean up _id fields in array objects before submitting
     const cleanArray = (arr) =>
       (arr || []).map(({ _id, ...rest }) => (_id && _id !== '' ? { _id, ...rest } : rest));
-
     const dataToSubmit = {
       ...formData,
-      symbol: selected ? selected._id : formData.symbol, // for edit keep existing symbol id
+      symbol: selected ? selected._id : formData.symbol,
       source_timeframes: cleanArray(formData.source_timeframes),
       key_levels: cleanArray(formData.key_levels),
       participants: cleanArray(formData.participants),
     };
-
     onSubmit(dataToSubmit);
   };
-
 
   // Debounced search for symbols
   const debouncedSearch = useCallback(
@@ -142,20 +136,24 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
   // Initialize form data with priceAction if provided
   useEffect(() => {
     if (priceAction) {
-      // Initialize timeframe fields with existing data
       setTimeframeFields(priceAction.source_timeframes.map(tf => ({
         timeframe: tf.timeframe,
         zone_type: tf.zone_type,
         zone_price_range: tf.zone_price_range,
         reason_price_reached_here: tf.reason_price_reached_here
       })));
-      
       setFormData(prev => ({
         ...prev,
         ...priceAction,
+        symbol: priceAction.symbol?._id || priceAction.symbol || '',
         userId: user._id,
+        key_levels: priceAction.key_levels?.length ? priceAction.key_levels : [{ level_type: '', price: '' }],
+        trade_setups: priceAction.trade_setups?.length ? priceAction.trade_setups : [''],
+        positives: priceAction.positives?.length ? priceAction.positives : [''],
+        negatives: priceAction.negatives?.length ? priceAction.negatives : [''],
+        participants: priceAction.participants?.length ? priceAction.participants : [{ user: '' }],
       }));
-      setSymbolInput(priceAction.symbol?.symbol || ''); // assuming populated symbol
+      setSymbolInput(priceAction.symbol?.symbol || priceAction.symbol || '');
     }
   }, [priceAction, user]);
 
@@ -177,8 +175,8 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
           placeholder="Symbol"
           className="border p-2 rounded"
           required={!priceAction}
+          disabled={!!priceAction} // Disable when editing
         />
-
         <datalist id="symbol-suggestions">
           {symbolOptions.map((sym) => (
             <option key={sym._id} value={sym.symbol} />
@@ -194,7 +192,6 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         placeholder="Trend Direction HTF"
         className="border p-2 rounded"
       />
-
       <input
         name="current_EMA_alignment"
         value={formData.current_EMA_alignment}
@@ -202,7 +199,6 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         placeholder="EMA Alignment"
         className="border p-2 rounded"
       />
-
       <input
         name="confidence_score"
         value={formData.confidence_score}
@@ -222,6 +218,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Timeframe {index + 1}</span>
               <button
+                type="button"
                 onClick={() => handleRemoveTimeframe(index)}
                 className="text-red-500 hover:text-red-700"
                 disabled={timeframeFields.length === 1}
@@ -283,6 +280,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
           </div>
         ))}
         <button
+          type="button" // Prevent form submission
           onClick={handleAddTimeframe}
           className="text-blue-500 hover:text-blue-700"
         >
@@ -494,7 +492,6 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         className="w-full border p-2 rounded"
       />
 
-      {/* Demand-Supply Checkbox */}
       <div className="flex items-center space-x-2">
         <input
           type="checkbox"
@@ -505,8 +502,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         <label>Follows Demand Supply</label>
       </div>
 
-      {/* Buttons */}
-      <div className=" justify-end space-x-3 pt-2">
+      <div className="flex justify-end space-x-3 pt-2">
         <button
           type="button"
           onClick={onCancel}

@@ -25,11 +25,7 @@ const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails }) => {
 
       {/* Right Detail Section */}
       <div className="w-2/3 overflow-y-auto p-6">
-        {selectedItem ? (
-          renderDetails(selectedItem)
-        ) : (
-          <p className="text-gray-500">Select a stock to view details.</p>
-        )}
+        {renderDetails(selectedItem)}
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import ListItemLayout from "../../components/layouts/ItemDetailsLayout";
 const PriceActions = () => {
   const [selected, setSelected] = useState(null);
   const [items, setItems] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const fetchPA = async () => {
@@ -22,7 +21,6 @@ const PriceActions = () => {
 
   const handleAddNew = async (data) => {
     await createPriceAction(data);
-    setOpenDialog(false);
     // Refetch after adding
     const res = await getAllPriceActions();
     const pa = res.map((pa) => ({
@@ -31,9 +29,11 @@ const PriceActions = () => {
       follows_demand_supply: pa.follows_demand_supply,
       trend_direction_HTF: pa.trend_direction_HTF,
       current_EMA_alignment: pa.current_EMA_alignment,
+      confidence_score: pa.confidence_score,
       notes: pa.notes,
     }));
     setItems(pa);
+    setSelected(null);
   };
 
   const renderDetails = (item) => (
@@ -49,6 +49,7 @@ const PriceActions = () => {
         EMA Alignment: {item.current_EMA_alignment}
       </p>
       <p className="text-gray-600">Notes: {item.notes}</p>
+      {/* Optionally, add an Edit button to show the form for editing */}
       <AddPriceActionForm
         initialData={item}
         onSubmit={handleAddNew}
@@ -63,7 +64,7 @@ const PriceActions = () => {
       <div className="flex justify-between items-center p-4 bg-white border-b">
         <h1 className="text-2xl font-semibold">Price Action Logs</h1>
         <button
-          onClick={() => setOpenDialog(true)}
+          onClick={() => setSelected(null)}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
           + Add New
@@ -74,19 +75,15 @@ const PriceActions = () => {
         items={items}
         selectedItem={selected}
         onSelect={setSelected}
-        renderDetails={renderDetails}
+        renderDetails={item =>
+          item ? renderDetails(item) : (
+            <AddPriceActionForm
+              onSubmit={handleAddNew}
+              onCancel={() => setSelected(null)}
+            />
+          )
+        }
       />
-
-      <ModalDialog
-        isOpen={openDialog}
-        onClose={() => setOpenDialog(false)}
-        title="Add New Price Action"
-      >
-        <AddPriceActionForm
-          onSubmit={handleAddNew}
-          onCancel={() => setOpenDialog(false)}
-        />
-      </ModalDialog>
     </>
   );
 };

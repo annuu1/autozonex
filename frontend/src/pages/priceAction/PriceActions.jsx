@@ -1,7 +1,7 @@
-import react, {useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import ModalDialog from "../../components/common/ModalDialog";
 import AddPriceActionForm from "../../components/dialogs/AddPriceActionForm";
-import { createPriceAction, getAllPriceActions } from "../../api/priceAction";
+import { createPriceAction, getAllPriceActions, updatePriceAction } from "../../api/priceAction";
 import ListItemLayout from "../../components/layouts/ItemDetailsLayout";
 
 const PriceActions = () => {
@@ -11,21 +11,26 @@ const PriceActions = () => {
   useEffect(() => {
     const fetchPA = async () => {
       const res = await getAllPriceActions();
-      setItems(res);
-      if(res.length > 0){
+      setItems(res || []);
+      if (res?.length > 0) {
         setSelected(res[0]);
       }
     };
     fetchPA();
   }, []);
 
-  const handleAddNew = async (data) => {
-    await createPriceAction(data);
-    // Refetch after adding
+  const handleSubmit = async (data) => {
+    if (data._id) {
+      // Update existing price action
+      await updatePriceAction(data._id, data);
+    } else {
+      // Create new price action
+      await createPriceAction(data);
+    }
     const res = await getAllPriceActions();
     const pa = res.map((pa) => ({
       _id: pa._id,
-      symbol: pa.symbol.symbol,
+      symbol: typeof pa.symbol === 'string' ? { symbol: pa.symbol, _id: pa.symbol } : pa.symbol,
       follows_demand_supply: pa.follows_demand_supply,
       trend_direction_HTF: pa.trend_direction_HTF,
       current_EMA_alignment: pa.current_EMA_alignment,
@@ -38,7 +43,7 @@ const PriceActions = () => {
 
   const renderDetails = (item) => (
     <div>
-      <h2 className="text-2xl font-bold mb-4">{item.symbol.symbol} Details</h2>
+      <h2 className="text-2xl font-bold mb-4">{item.symbol?.symbol || item.symbol || 'N/A'} Details</h2>
       <p className="text-gray-600 mb-2">
         Follows Demand Supply: {item.follows_demand_supply ? "✅" : "❌"}
       </p>
@@ -49,12 +54,10 @@ const PriceActions = () => {
         EMA Alignment: {item.current_EMA_alignment}
       </p>
       <p className="text-gray-600">Notes: {item.notes}</p>
-      {/* Optionally, add an Edit button to show the form for editing */}
       <AddPriceActionForm
-        initialData={item}
-        onSubmit={handleAddNew}
+        priceAction={item}
+        onSubmit={handleSubmit}
         onCancel={() => setSelected(null)}
-        priceAction={selected}
       />
     </div>
   );
@@ -64,6 +67,7 @@ const PriceActions = () => {
       <div className="flex justify-between items-center p-4 bg-white border-b">
         <h1 className="text-2xl font-semibold">Price Action Logs</h1>
         <button
+          type="button"
           onClick={() => setSelected(null)}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
@@ -78,7 +82,7 @@ const PriceActions = () => {
         renderDetails={item =>
           item ? renderDetails(item) : (
             <AddPriceActionForm
-              onSubmit={handleAddNew}
+              onSubmit={handleSubmit}
               onCancel={() => setSelected(null)}
             />
           )

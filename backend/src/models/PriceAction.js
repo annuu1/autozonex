@@ -72,12 +72,6 @@ const PriceActionSchema = new mongoose.Schema({
   current_EMA_alignment: {
     type: String, // "Above all EMAs", "Between EMAs", "Below all EMAs"
   },
-  volume_behavior: {
-    type: String, // "High", "Average", "Low"
-  },
-  candle_behavior_notes: {
-    type: String,
-  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("PriceAction", PriceActionSchema);

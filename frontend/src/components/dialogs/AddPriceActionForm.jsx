@@ -15,8 +15,6 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
     notes: '',
     userId: user._id,
     confidence_score: '',
-    volume_behavior: '',
-    candle_behavior_notes: '',
     last_seen: '',
     source_timeframes: [
       {
@@ -31,7 +29,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
     trade_setups: [''],
     positives: [''],
     negatives: [''],
-    participants: [{ user: '' }], // Initialize participants to avoid undefined errors
+    participants: [{ user: '' }],
   });
 
   // Timeframe fields state
@@ -104,14 +102,27 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       alert('Please select a valid symbol from suggestions.');
       return;
     }
+    // Validate source_timeframes
+    const invalidTimeframes = formData.source_timeframes.some(
+      tf => !tf.timeframe || !tf.zone_type
+    );
+    if (invalidTimeframes) {
+      alert('All timeframes must have a valid timeframe and zone type.');
+      return;
+    }
     const cleanArray = (arr) =>
-      (arr || []).map(({ _id, ...rest }) => (_id && _id !== '' ? { _id, ...rest } : rest));
+      (arr || []).map(({ _id, ...rest }) => (_id && _id !== '' ? { _id, ...rest } : rest))
+        .filter(item => Object.values(item).some(val => val !== '' && val != null));
     const dataToSubmit = {
       ...formData,
+      _id: priceAction?._id || undefined,
       symbol: selected ? selected._id : formData.symbol,
       source_timeframes: cleanArray(formData.source_timeframes),
       key_levels: cleanArray(formData.key_levels),
       participants: cleanArray(formData.participants),
+      trade_setups: formData.trade_setups.filter(setup => setup !== ''),
+      positives: formData.positives.filter(pos => pos !== ''),
+      negatives: formData.negatives.filter(neg => neg !== ''),
     };
     onSubmit(dataToSubmit);
   };
@@ -136,7 +147,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
   // Initialize form data with priceAction if provided
   useEffect(() => {
     if (priceAction) {
-      setTimeframeFields(priceAction.source_timeframes.map(tf => ({
+      setTimeframeFields(priceAction.source_timeframes?.map(tf => ({
         timeframe: tf.timeframe,
         zone_type: tf.zone_type,
         zone_price_range: tf.zone_price_range,
@@ -145,6 +156,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       setFormData(prev => ({
         ...prev,
         ...priceAction,
+        _id: priceAction._id, // Ensure _id is included
         symbol: priceAction.symbol?._id || priceAction.symbol || '',
         userId: user._id,
         key_levels: priceAction.key_levels?.length ? priceAction.key_levels : [{ level_type: '', price: '' }],
@@ -175,7 +187,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
           placeholder="Symbol"
           className="border p-2 rounded"
           required={!priceAction}
-          disabled={!!priceAction} // Disable when editing
+          disabled={!!priceAction}
         />
         <datalist id="symbol-suggestions">
           {symbolOptions.map((sym) => (
@@ -280,7 +292,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
           </div>
         ))}
         <button
-          type="button" // Prevent form submission
+          type="button"
           onClick={handleAddTimeframe}
           className="text-blue-500 hover:text-blue-700"
         >

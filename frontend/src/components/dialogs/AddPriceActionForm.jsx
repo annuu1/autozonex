@@ -248,11 +248,12 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
                   className="w-full border p-2 rounded"
                 >
                   <option value="">Select timeframe</option>
+                  <option value="1Y">1Y</option>
+                  <option value="6M">6M</option>
+                  <option value="3M">3M</option>
                   <option value="1M">1M</option>
                   <option value="1W">1W</option>
                   <option value="1D">1D</option>
-                  <option value="4H">4H</option>
-                  <option value="1H">1H</option>
                 </select>
               </div>
               <div>

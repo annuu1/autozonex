@@ -28,7 +28,7 @@ exports.createSymbol = async (req, res) => {
   try {
     const { symbol, name, exchange, sector, industry, active } = req.body;
     const newSymbol = new Symbol({
-      symbol,
+      symbol:symbol.toUpperCase(),
       name,
       exchange,
       sector,

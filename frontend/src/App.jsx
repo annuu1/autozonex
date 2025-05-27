@@ -16,6 +16,7 @@ import Note from './pages/note/Note';
 import WatchList from './pages/watchList/WatchList';
 import Alert from './pages/alert/Alert';
 import PriceActions from './pages/priceAction/PriceActions';
+import Symbols from './pages/symbol/Symbols';
 
 const App = () => {
   return (
@@ -147,6 +148,16 @@ const App = () => {
         <MainLayout>
           <ProtectedRoute>
             <PriceActions />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+      <Route
+      path = "/symbols"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <Symbols />
           </ProtectedRoute>
         </MainLayout>
       }

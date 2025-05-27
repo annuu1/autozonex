@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ModalDialog from "../../components/common/ModalDialog";
 import AddPriceActionForm from "../../components/dialogs/AddPriceActionForm";
-import { createPriceAction, getAllPriceActions, updatePriceAction } from "../../api/priceAction";
+import { createPriceAction, deletePriceAction, getAllPriceActions, updatePriceAction } from "../../api/priceAction";
 import ListItemLayout from "../../components/layouts/ItemDetailsLayout";
 
 const PriceActions = () => {
@@ -79,6 +79,12 @@ const PriceActions = () => {
         items={items}
         selectedItem={selected}
         onSelect={setSelected}
+        onDelete={async (id) => {
+          await deletePriceAction(id);
+          const res = await getAllPriceActions();
+          setItems(res);
+          if (selected && selected._id === id) setSelected(null);
+        }}
         renderDetails={item =>
           item ? renderDetails(item) : (
             <AddPriceActionForm

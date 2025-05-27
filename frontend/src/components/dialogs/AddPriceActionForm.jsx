@@ -15,7 +15,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
     notes: '',
     userId: user._id,
     confidence_score: '',
-    last_seen: '',
+    last_seen: new Date().toISOString(),
     source_timeframes: [
       {
         _id: '',

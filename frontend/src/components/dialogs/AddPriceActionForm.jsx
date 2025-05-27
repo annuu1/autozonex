@@ -9,7 +9,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
   // Form state
   const [formData, setFormData] = useState({
     symbol: '',
-    follows_demand_supply: false,
+    follows_demand_supply: true,
     trend_direction_HTF: '',
     current_EMA_alignment: '',
     notes: '',

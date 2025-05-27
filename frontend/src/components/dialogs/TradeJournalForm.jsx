@@ -193,10 +193,9 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
     }));
   };
 
-
   const handleSymbolChange = (e) => {
     const value = e.target.value;
-    setForm({...form, symbol:value});
+    setForm({ ...form, symbol: value });
     debouncedSearch(value);
   };
 
@@ -298,12 +297,11 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
               Symbol <span className="text-red-500">*</span>
             </label>
             <div>
-<SymbolSuggestionInput
-  value={form.symbol}
-  onChange={e => setForm({ ...form, symbol: e.target.value })}
-/>
-
-      </div>
+              <SymbolSuggestionInput
+                value={form.symbol}
+                onChange={(e) => setForm({ ...form, symbol: e.target.value })}
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -419,17 +417,17 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             </select>
           </div>
           <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Emotion Before
-                </label>
-                <input
-                  type="text"
-                  name="emotionBefore"
-                  value={form.emotionBefore || ''}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-                />
-              </div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Emotion Before
+            </label>
+            <input
+              type="text"
+              name="emotionBefore"
+              value={form.emotionBefore || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            />
+          </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Journal Notes

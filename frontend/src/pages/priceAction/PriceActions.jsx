@@ -12,15 +12,10 @@ const PriceActions = () => {
   useEffect(() => {
     const fetchPA = async () => {
       const res = await getAllPriceActions();
-      const pa = res.map((pa) => ({
-        _id: pa._id,
-        symbol: pa.symbol.symbol,
-        follows_demand_supply: pa.follows_demand_supply,
-        trend_direction_HTF: pa.trend_direction_HTF,
-        current_EMA_alignment: pa.current_EMA_alignment,
-        notes: pa.notes,
-      }));
-      setItems(pa);
+      setItems(res);
+      if(res.length > 0){
+        setSelected(res[0]);
+      }
     };
     fetchPA();
   }, []);
@@ -43,7 +38,7 @@ const PriceActions = () => {
 
   const renderDetails = (item) => (
     <div>
-      <h2 className="text-2xl font-bold mb-4">{item.symbol} Details</h2>
+      <h2 className="text-2xl font-bold mb-4">{item.symbol.symbol} Details</h2>
       <p className="text-gray-600 mb-2">
         Follows Demand Supply: {item.follows_demand_supply ? "✅" : "❌"}
       </p>

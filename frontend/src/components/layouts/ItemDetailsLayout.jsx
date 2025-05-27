@@ -17,7 +17,7 @@ const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails }) => {
                   : "hover:bg-gray-100"
               }`}
             >
-              {item.symbol}
+              {item.symbol?.symbol || 'N/A'}
             </li>
           ))}
         </ul>

@@ -24,15 +24,27 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
     negatives: [],
   });
 
+  // Initialize form data with priceAction if provided
+  useEffect(() => {
+    if (priceAction) {
+      setFormData(prev => ({
+        ...prev,
+        ...priceAction,
+        userId: user._id,
+      }));
+    }
+  }, [priceAction, user]);
+
   const [symbolOptions, setSymbolOptions] = useState([]);
   const [symbolInput, setSymbolInput] = useState('');
 
   useEffect(() => {
     if (priceAction) {
-      setFormData({
+      setFormData(prev => ({
+        ...prev,
         ...priceAction,
         userId: user._id,
-      });
+      }));
       setSymbolInput(priceAction.symbol?.symbol || ''); // assuming populated symbol
     }
   }, [priceAction, user]);

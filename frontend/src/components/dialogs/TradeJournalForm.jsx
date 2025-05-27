@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   createTradeJournal,
   updateTradeJournal,
   fetchTradeJournal,
 } from '../../api/tradeJournal';
 import { getSettings } from '../../api/setting';
+
+import SymbolSuggestionInput from '../common/SymbolSuggestionInput';
+import { searchSymbols } from '../../api/symbols';
+import debounce from 'lodash.debounce';
 
 // Ensure all fields in initialFormState are initialized to prevent undefined
 const initialFormState = {
@@ -41,6 +45,9 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
   const [stopLossTouched, setStopLossTouched] = useState(false);
   const [useRiskPerTrade, setUseRiskPerTrade] = useState(false);
   const [riskPerTrade, setRiskPerTrade] = useState(100);
+
+  const [symbolOptions, setSymbolOptions] = useState([]);
+  const [symbolInput, setSymbolInput] = useState('');
 
   //get rist pertrade
   useEffect(() => {
@@ -186,6 +193,29 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
     }));
   };
 
+
+  const handleSymbolChange = (e) => {
+    const value = e.target.value;
+    setForm({...form, symbol:value});
+    debouncedSearch(value);
+  };
+
+  const debouncedSearch = useCallback(
+    debounce(async (query) => {
+      if (!query) {
+        setSymbolOptions([]);
+        return;
+      }
+      try {
+        const results = await searchSymbols(query);
+        setSymbolOptions(results);
+      } catch (error) {
+        console.error('Error fetching symbols:', error);
+      }
+    }, 500),
+    []
+  );
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -267,14 +297,13 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Symbol <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              name="symbol"
-              value={form.symbol || ''}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
-            />
+            <div>
+<SymbolSuggestionInput
+  value={form.symbol}
+  onChange={e => setForm({ ...form, symbol: e.target.value })}
+/>
+
+      </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -56,8 +56,33 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+const fs = require('fs');
+const path = require('path');
+
+// Delete all files in the logs directory
+function clearLogs() {
+  const logsDir = path.join(__dirname, '../logs');
+  fs.readdir(logsDir, (err, files) => {
+    if (err) {
+      logger && logger.error ? logger.error('Error reading logs directory:', err) : console.error('Error reading logs directory:', err);
+      return;
+    }
+    files.forEach(file => {
+      const filePath = path.join(logsDir, file);
+      fs.unlink(filePath, err => {
+        if (err) {
+          logger && logger.error ? logger.error(`Failed to delete log file: ${filePath}`, err) : console.error(`Failed to delete log file: ${filePath}`, err);
+        } else {
+          logger && logger.info ? logger.info(`Deleted log file: ${filePath}`) : console.log(`Deleted log file: ${filePath}`);
+        }
+      });
+    });
+  });
+}
+
 const startServer = async () => {
   try {
+    clearLogs();
     await connectDB();
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);

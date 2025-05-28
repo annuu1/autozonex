@@ -93,109 +93,102 @@ const AllZones = () => {
 
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
-
-      <div className="flex gap-4 mb-4">
-  <input
-    type="date"
-    value={targetDate}
-    onChange={(e) => setTargetDate(e.target.value)}
-    className="border p-2 rounded"
-  />
-  <button
-    onClick={handleFetchDemandZones}
-    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-  >
-    Fetch Demand Zones
-  </button>
-</div>
-
-
-      {loading && (
-        <div className="flex justify-center my-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+    <div className="flex h-screen w-full bg-gray-50">
+      {/* Left List Section */}
+      <div className="w-1/3 border-r border-gray-300 overflow-y-auto p-4 bg-white">
+        <h2 className="text-xl font-semibold mb-4">Zones</h2>
+        <div className="mb-4 flex gap-2">
+          <input
+            type="date"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+          <button
+            onClick={handleFetchDemandZones}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Fetch
+          </button>
         </div>
-      )}
-      {error && (
-        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">{error}</div>
-      )}
-
-      {/* Zones Table */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort('ticker')}>
-                Ticker {sortBy === 'ticker' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="p-2 border">Time Frame</th>
-              <th className="p-2 border">Type</th>
-              <th className="p-2 border">Pattern</th>
-              <th className="p-2 border">Proximal Line</th>
-              <th className="p-2 border">Distal Line</th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort('tradeScore')}>
-                Trade Score {sortBy === 'tradeScore' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="p-2 border cursor-pointer" onClick={() => handleSort('legOutDate')}>
-                Leg Out Date {sortBy === 'legOutDate' && (sortOrder === 'asc' ? '↑' : '↓')}
-              </th>
-              <th className="p-2 border">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedZones.map((zone, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="p-2 border">{zone.ticker}</td>
-                <td className="p-2 border">{zone.timeFrame}</td>
-                <td className="p-2 border">{zone.type}</td>
-                <td className="p-2 border">{zone.pattern}</td>
-                <td className="p-2 border">{formatNumber(zone.proximalLine)}</td>
-                <td className="p-2 border">{formatNumber(zone.distalLine)}</td>
-                <td className="p-2 border">{zone.tradeScore}</td>
-                <td className="p-2 border">{formatDate(zone.legOutDate)}</td>
-                <td className="p-2 border">
-                  <button
-                    onClick={() => setSelectedZone(zone)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                  >
-                    View Chart
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination Controls */}
-      <div className="flex justify-center gap-4 mt-4">
-        <button
-          onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-          disabled={page === 1}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span className="self-center">Page {page} of {totalPages}</span>
-        <button
-          onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
-          disabled={page === totalPages}
-          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Chart */}
-      {selectedZone && (
-        <div className="mt-8">
-          <h2 className="text-xl font-bold mb-4">
-            Chart for {selectedZone.ticker} ({selectedZone.timeFrame})
-          </h2>
-          <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
+        {loading && (
+          <div className="flex justify-center my-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-4">{error}</div>
+        )}
+        <ul className="space-y-2">
+          {sortedZones.map((zone, idx) => (
+            <li
+              key={zone._id || idx}
+              className={`p-3 rounded-lg cursor-pointer flex flex-col transition ${selectedZone?._id === zone._id ? "bg-blue-100 font-semibold" : "hover:bg-gray-100"}`}
+              onClick={() => setSelectedZone(zone)}
+            >
+              <div className="flex justify-between items-center">
+                <span className="font-semibold">{zone.ticker}</span>
+                <span className="ml-2 text-xs text-gray-500">{zone.timeFrame}</span>
+                <span className="ml-2 text-xs text-gray-600">{zone.type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-xs text-gray-700">Score: {zone.tradeScore}</span>
+                <span className="text-xs text-gray-700">{formatDate(zone.legOutDate)}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {/* Pagination Controls */}
+        <div className="flex justify-center gap-4 mt-4">
+          <button
+            onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+            disabled={page === 1}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <span className="self-center">Page {page} of {totalPages}</span>
+          <button
+            onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={page === totalPages}
+            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
-      )}
+      </div>
+      {/* Right Detail Section */}
+      <div className="w-2/3 overflow-y-auto p-6 flex flex-col">
+        <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
+        {selectedZone ? (
+          <>
+            <div className="mb-6">
+              <h2 className="text-xl font-bold mb-2">Zone Details</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div><strong>Ticker:</strong> {selectedZone.ticker}</div>
+                <div><strong>Time Frame:</strong> {selectedZone.timeFrame}</div>
+                <div><strong>Type:</strong> {selectedZone.type}</div>
+                <div><strong>Pattern:</strong> {selectedZone.pattern}</div>
+                <div><strong>Proximal Line:</strong> {formatNumber(selectedZone.proximalLine)}</div>
+                <div><strong>Distal Line:</strong> {formatNumber(selectedZone.distalLine)}</div>
+                <div><strong>Trade Score:</strong> {selectedZone.tradeScore}</div>
+                <div><strong>Leg Out Date:</strong> {formatDate(selectedZone.legOutDate)}</div>
+                <div><strong>Created:</strong> {selectedZone.createdAt ? formatDate(selectedZone.createdAt) : '-'}</div>
+                <div><strong>Updated:</strong> {selectedZone.updatedAt ? formatDate(selectedZone.updatedAt) : '-'}</div>
+              </div>
+            </div>
+            {/* Chart at the bottom */}
+            <div className="mt-auto">
+              <h2 className="text-xl font-bold mb-4">
+                Chart for {selectedZone.ticker} ({selectedZone.timeFrame})
+              </h2>
+              <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
+            </div>
+          </>
+        ) : (
+          <div className="text-gray-500 text-lg flex items-center justify-center h-full">Select a zone to view details and chart.</div>
+        )}
+      </div>
     </div>
   );
 };

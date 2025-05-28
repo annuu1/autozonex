@@ -162,6 +162,19 @@ const AllZones = () => {
         <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
         {selectedZone ? (
           <>
+            {/* Chart at the bottom */}
+            <div className="mt-auto">
+              <h2 className="text-xl font-bold mb-4 text-gray-600">
+                Chart for {selectedZone.ticker} ({selectedZone.timeFrame})
+              </h2>
+              <div>
+              <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
+              </div>
+              <div className="flex gap-4">
+              <StockChart ticker={selectedZone.ticker} timeFrame={"1wk"} selectedZone={selectedZone} />
+              <StockChart ticker={selectedZone.ticker} timeFrame={"1mo"} selectedZone={selectedZone} />
+              </div>
+            </div>
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2">Zone Details</h2>
               <div className="grid grid-cols-2 gap-4">
@@ -176,13 +189,6 @@ const AllZones = () => {
                 <div><strong>Created:</strong> {selectedZone.createdAt ? formatDate(selectedZone.createdAt) : '-'}</div>
                 <div><strong>Updated:</strong> {selectedZone.updatedAt ? formatDate(selectedZone.updatedAt) : '-'}</div>
               </div>
-            </div>
-            {/* Chart at the bottom */}
-            <div className="mt-auto">
-              <h2 className="text-xl font-bold mb-4">
-                Chart for {selectedZone.ticker} ({selectedZone.timeFrame})
-              </h2>
-              <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
             </div>
           </>
         ) : (

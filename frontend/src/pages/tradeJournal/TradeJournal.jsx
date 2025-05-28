@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import TradeJournalForm from "../../components/dialogs/TradeJournalForm";
 import {formatDate} from "../../utils/formatDate"
+import ListItemLayout from "../../components/layouts/ItemDetailsLayout";
 
 // --- API Consumer Functions ---
 const API_URL = import.meta.env.VITE_API_URL || "";
@@ -59,8 +60,8 @@ const deleteTradeJournal = async (id) => {
 const TradeJournal = () => {
   const { user, loading: authLoading } = useContext(AuthContext);
   const [journals, setJournals] = useState([]);
+  const [selectedJournal, setSelectedJournal] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [editData, setEditData] = useState(null);
 
   // Fetch all trade journals
@@ -84,14 +85,13 @@ const TradeJournal = () => {
   }, [authLoading, user]);
 
   // Add or update trade
-  const handleDialogSubmit = async (form) => {
+  const handleFormSubmit = async (form) => {
     try {
       if (editData && editData._id) {
         await updateTradeJournal(editData._id, form);
       } else {
         await addTradeJournal(form);
       }
-      setDialogOpen(false);
       setEditData(null);
       loadJournals();
     } catch (err) {
@@ -99,16 +99,89 @@ const TradeJournal = () => {
     }
   };
 
-  // Open dialog for add
+  // Open add form on details side
   const handleAdd = () => {
-    setEditData(null);
-    setDialogOpen(true);
+    setEditData({});
+    setSelectedJournal(null);
   };
 
-  // Open dialog for edit
+  // Open edit form on details side
   const handleEdit = (journal) => {
     setEditData(journal);
-    setDialogOpen(true);
+    setSelectedJournal(journal);
+  };
+
+  // Render details or form for selected journal
+  const renderDetails = (journal) => {
+    if (editData && (editData._id || Object.keys(editData).length > 0)) {
+      return (
+        <TradeJournalForm
+          open={true}
+          onClose={() => setEditData(null)}
+          onSuccess={handleFormSubmit}
+          editId={editData._id || null}
+          initialData={editData}
+        />
+      );
+    }
+    if (!journal) {
+      return <div className="text-gray-500 text-lg">Select a trade entry to view its details.</div>;
+    }
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-2xl font-bold text-gray-800">{journal.symbol?.toUpperCase() || 'N/A'} Trade</h3>
+          <div className="space-x-2">
+            <button
+              onClick={() => handleEdit(journal)}
+              className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => handleDelete(journal._id)}
+              className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div><span className="font-semibold">Date: </span>{journal.tradeDate ? formatDate(journal.tradeDate) : '—'}</div>
+          <div><span className="font-semibold">Trade Type: </span>{journal.tradeType || '—'}</div>
+          <div><span className="font-semibold">Entry Price: </span>{journal.entryPrice}</div>
+          <div><span className="font-semibold">Quantity: </span>{journal.quantity}</div>
+          <div><span className="font-semibold">Position Size: </span>{journal.positionSize}</div>
+          <div><span className="font-semibold">Stop Loss: </span>{journal.stopLoss}</div>
+          <div><span className="font-semibold">Fees: </span>{journal.fees || '—'}</div>
+          <div><span className="font-semibold">Status: </span>{journal.status}</div>
+          <div><span className="font-semibold">Broker: </span>{journal.broker || '—'}</div>
+          <div><span className="font-semibold">Market: </span>{journal.market || '—'}</div>
+          <div><span className="font-semibold">Risk/Reward: </span>{journal.riskRewardRatio || '—'}</div>
+          <div><span className="font-semibold">Strategy: </span>{journal.strategy || '—'}</div>
+          <div className="col-span-2"><span className="font-semibold">Tags: </span>{journal.tags && journal.tags.length ? journal.tags.join(', ') : '—'}</div>
+        </div>
+        <div>
+          <span className="font-semibold">Notes: </span>{journal.journalNotes || '—'}
+        </div>
+        <div>
+          <span className="font-semibold">Emotion Before: </span>{journal.emotionBefore || '—'}
+        </div>
+        <div>
+          <span className="font-semibold">Emotion After: </span>{journal.emotionAfter || '—'}
+        </div>
+        <div>
+          <span className="font-semibold">Holding Period: </span>{journal.holdingPeriod || '—'}
+        </div>
+        {journal.setupScreenshotUrl && (
+          <div>
+            <span className="font-semibold">Screenshot: </span>
+            <a href={journal.setupScreenshotUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">View Screenshot</a>
+          </div>
+        )}
+        <div className="text-xs text-gray-400 mt-6">Created: {journal.createdAt ? formatDate(journal.createdAt) : '—'} | Updated: {journal.updatedAt ? formatDate(journal.updatedAt) : '—'}</div>
+      </div>
+    );
   };
 
   // Delete trade
@@ -127,80 +200,26 @@ const TradeJournal = () => {
   }
 
   return (
-    <div className="w-full p-6">
-      <h2 className="text-2xl font-semibold text-gray-800 mb-6">Trade Journal</h2>
-      <button
-        onClick={handleAdd}
-        className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Add Trade Entry
-      </button>
-
-      <TradeJournalForm
-        open={dialogOpen}
-        onClose={() => {
-          setDialogOpen(false);
+    <div className="w-full h-screen">
+      <div className="flex items-center justify-between p-6 pb-0">
+        <h2 className="text-2xl font-semibold text-gray-800">Trade Journal</h2>
+        <button
+          onClick={handleAdd}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Add Trade Entry
+        </button>
+      </div>
+      <ListItemLayout
+        items={journals}
+        selectedItem={selectedJournal}
+        onSelect={item => {
+          setSelectedJournal(item);
           setEditData(null);
         }}
-        onSuccess={handleDialogSubmit}
-        editId={editData?._id || null}
+        renderDetails={renderDetails}
+        onDelete={handleDelete}
       />
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse bg-white shadow-sm rounded-lg">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Symbol</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Side</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Quantity</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Price</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">PnL</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Fees</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Notes</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
-              <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {journals.length === 0 ? (
-              <tr>
-                <td colSpan={9} className="text-center py-4 text-gray-600">
-                  No trade entries found.
-                </td>
-              </tr>
-            ) : (
-              journals.map((j) => (
-                <tr key={j._id} className="border-t border-gray-200 hover:bg-gray-50">
-                  <td className="px-4 py-2 text-nowrap">{j.tradeDate ? formatDate(j.tradeDate) : ""}</td>
-                  <td className="px-4 py-2">{j.symbol.toUpperCase()}</td>
-                  <td className="px-4 py-2">{j.side}</td>
-                  <td className="px-4 py-2">{j.quantity}</td>
-                  <td className="px-4 py-2">{j.entryPrice}</td>
-                  <td className="px-4 py-2">{j.pnl}</td>
-                  <td className="px-4 py-2">{j.fees}</td>
-                  <td className="px-4 py-2">{j.notes}</td>
-                  <td className="px-4 py-2">{j.status}</td>
-                  <td className="px-4 py-2 flex space-x-2">
-                    <button
-                      onClick={() => handleEdit(j)}
-                      className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(j._id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 };

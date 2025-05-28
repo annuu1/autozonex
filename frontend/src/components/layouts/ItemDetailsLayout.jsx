@@ -17,7 +17,9 @@ const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails, onDelete
               }`}
               onClick={() => onSelect(item)}
             >
-              <span>{item.symbol?.symbol || 'N/A'}</span>
+              <span className="font-semibold">{item.symbol || 'N/A'}</span>
+              <span className="ml-2 text-xs text-gray-500">{item.tradeDate ? new Date(item.tradeDate).toLocaleDateString() : ''}</span>
+              <span className="ml-2 text-xs text-gray-600">{item.tradeType || ''}</span>
               <button
                 type="button"
                 className="ml-2 text-red-500 hover:text-red-700 p-1 rounded"

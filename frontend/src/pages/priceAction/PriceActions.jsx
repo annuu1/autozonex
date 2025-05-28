@@ -43,7 +43,9 @@ const PriceActions = () => {
 
   const renderDetails = (item) => (
     <div>
-      <h2 className="text-2xl font-bold mb-4">{item.symbol?.symbol || item.symbol || 'N/A'} Details</h2>
+      <h2 className="text-2xl font-bold mb-4">
+  {(typeof item.symbol === 'object' ? item.symbol?.symbol : item.symbol) || 'N/A'} Details
+</h2>
       <p className="text-gray-600 mb-2">
         Follows Demand Supply: {item.follows_demand_supply ? "✅" : "❌"}
       </p>

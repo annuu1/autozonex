@@ -17,7 +17,11 @@ const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails, onDelete
               }`}
               onClick={() => onSelect(item)}
             >
-              <span className="font-semibold">{item.symbol || 'N/A'}</span>
+              <span className="font-semibold">
+  {typeof item.symbol === 'object'
+    ? item.symbol?.symbol || 'N/A'
+    : item.symbol || 'N/A'}
+</span>
               <span className="ml-2 text-xs text-gray-500">{item.tradeDate ? new Date(item.tradeDate).toLocaleDateString() : ''}</span>
               <span className="ml-2 text-xs text-gray-600">{item.tradeType || ''}</span>
               <button

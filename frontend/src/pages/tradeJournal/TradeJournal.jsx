@@ -63,6 +63,7 @@ const TradeJournal = () => {
   const [selectedJournal, setSelectedJournal] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editData, setEditData] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("Open");
 
   // Fetch all trade journals
   const loadJournals = async () => {
@@ -199,6 +200,9 @@ const TradeJournal = () => {
     return <div className="text-center text-gray-600">Loading...</div>;
   }
 
+  // Filter journals by status
+  const filteredJournals = journals.filter(j => statusFilter === "All" ? true : j.status === statusFilter);
+
   return (
     <div className="w-full h-screen">
       <div className="flex items-center justify-between p-6 pb-0">
@@ -210,8 +214,29 @@ const TradeJournal = () => {
           Add Trade Entry
         </button>
       </div>
+      <div className="flex items-center gap-2 px-6 pb-2">
+        <span className="text-gray-600">Show:</span>
+        <button
+          className={`px-3 py-1 rounded-md border ${statusFilter === "Open" ? "bg-blue-500 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}`}
+          onClick={() => setStatusFilter("Open")}
+        >
+          Open
+        </button>
+        <button
+          className={`px-3 py-1 rounded-md border ${statusFilter === "Closed" ? "bg-blue-500 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}`}
+          onClick={() => setStatusFilter("Closed")}
+        >
+          Closed
+        </button>
+        <button
+          className={`px-3 py-1 rounded-md border ${statusFilter === "All" ? "bg-blue-500 text-white border-blue-600" : "bg-white text-gray-800 border-gray-300"}`}
+          onClick={() => setStatusFilter("All")}
+        >
+          All
+        </button>
+      </div>
       <ListItemLayout
-        items={journals}
+        items={filteredJournals}
         selectedItem={selectedJournal}
         onSelect={item => {
           setSelectedJournal(item);

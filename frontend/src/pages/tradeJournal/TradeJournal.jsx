@@ -114,7 +114,7 @@ const TradeJournal = () => {
 
   // Render details or form for selected journal
   const renderDetails = (journal) => {
-    if (editData && (editData._id || Object.keys(editData).length > 0)) {
+    if (editData !== null) {
       return (
         <TradeJournalForm
           open={true}

@@ -35,6 +35,9 @@ const initialFormState = {
   market: '',
   holdingPeriod: '',
   riskRewardRatio: '',
+  rateTrade: '', // new field
+  mode: 'Live', // new field
+  result: '', // new field
 };
 
 const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
@@ -150,6 +153,9 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
             market: data.market || '',
             holdingPeriod: data.holdingPeriod || '',
             riskRewardRatio: data.riskRewardRatio || '',
+            rateTrade: data.rateTrade != null ? data.rateTrade.toString() : '',
+            mode: data.mode || 'Paper',
+            result: data.result || '',
           };
           setForm(sanitizedData);
           setTagsInput(sanitizedData.tags.join(', '));
@@ -234,6 +240,9 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
         fees: form.fees ? parseFloat(form.fees) : undefined,
         tradeDate: form.tradeDate || undefined,
         exitDate: form.exitDate || undefined,
+        rateTrade: form.rateTrade !== '' ? Number(form.rateTrade) : undefined,
+        mode: form.mode || undefined,
+        result: form.result || undefined,
       };
       if (editId) {
         await updateTradeJournal(editId, payload);
@@ -439,6 +448,53 @@ const TradeJournalForm = ({ open, onClose, onSuccess, editId = null }) => {
               rows={4}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
             />
+          </div>
+
+          {/* New Fields */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Rate Trade
+            </label>
+            <input
+              type="number"
+              name="rateTrade"
+              value={form.rateTrade || ''}
+              onChange={handleChange}
+              min="0"
+              max="10"
+              step="1"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+              placeholder="Rate 1-10"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Mode
+            </label>
+            <select
+              name="mode"
+              value={form.mode || 'Paper'}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            >
+              <option value="Paper">Paper</option>
+              <option value="Live">Live</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Result
+            </label>
+            <select
+              name="result"
+              value={form.result || ''}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+            >
+              <option value="">Select Result</option>
+              <option value="win">Win</option>
+              <option value="loss">Loss</option>
+            </select>
           </div>
 
           {/* Optional Fields */}

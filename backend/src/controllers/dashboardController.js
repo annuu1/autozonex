@@ -3,15 +3,17 @@ const TradeJournal = require('../models/TradeJournal');
 // Dashboard Controller
 exports.getDashboardStats = async (req, res) => {
   const totalTrades = await TradeJournal.find({});
-  const wins = await TradeJournal.find({ result: 'win' });
+  const totalClosed = await TradeJournal.find({status:"closed"})
+  const wins = await TradeJournal.find({ result: 'win' });  
   const losses = await TradeJournal.find({ result: 'loss' });
-  const winRate = (wins.length / totalTrades.length) * 100;
+  const winRate = (wins.length / totalClosed.length ? totalClosed.length : 1) * 100;
   res.json({
     todaysDemandZones: 18,
     totalTrades: totalTrades.length,
     winRate: winRate.toFixed(2),
     wins: wins.length,
-    losses: losses.length
+    losses: losses.length,
+    totalClosed: totalClosed.length
   });
 };
 

@@ -9,15 +9,23 @@ const columns = [
   { field: 'legOutDate', headerName: 'Leg Out Date', width: 160 },
 ];
 
-const rows = [
-  { id: 1, ticker: 'NIFTY', proximalLine: 19850, distalLine: 19760, timeFrame: '1d', legOutDate: '2024-05-21' },
-  { id: 2, ticker: 'RELIANCE', proximalLine: 2560, distalLine: 2520, timeFrame: '1d', legOutDate: '2024-05-21' },
-];
+import CircularProgress from '@mui/material/CircularProgress';
 
-const ZonesTable = () => {
+const ZonesTable = ({ rows = [], loading = false }) => {
   return (
-    <div style={{ height: 300, width: '100%' }}>
-      <DataGrid rows={rows} columns={columns} pageSize={5} />
+    <div style={{ height: 300, width: '100%', position: 'relative' }}>
+      <DataGrid rows={rows} columns={columns} pageSize={5} loading={loading} />
+      {loading && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 1
+        }}>
+          <CircularProgress />
+        </div>
+      )}
     </div>
   );
 };

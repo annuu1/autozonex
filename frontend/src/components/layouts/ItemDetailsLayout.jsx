@@ -1,40 +1,10 @@
 import React from "react";
 
-const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails, onDelete, statusFilter, setStatusFilter }) => {
+const ListItemLayout = ({ items, selectedItem, onSelect, renderDetails, onDelete }) => {
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Left List Section */}
       <div className="w-1/3 border-r border-gray-300 overflow-y-auto p-4 bg-white">
-        <div className="flex items-center gap-2 px-6 py-2 bg-white shadow-sm">
-          <span className="text-gray-600">Show:</span>
-          <button
-            className={`px-3 py-1 rounded-md border ${statusFilter === "Open"
-                ? "bg-blue-500 text-white border-blue-600"
-                : "bg-white text-gray-800 border-gray-300"
-              }`}
-            onClick={() => setStatusFilter("Open")}
-          >
-            Open
-          </button>
-          <button
-            className={`px-3 py-1 rounded-md border ${statusFilter === "Closed"
-                ? "bg-blue-500 text-white border-blue-600"
-                : "bg-white text-gray-800 border-gray-300"
-              }`}
-            onClick={() => setStatusFilter("Closed")}
-          >
-            Closed
-          </button>
-          <button
-            className={`px-3 py-1 rounded-md border ${statusFilter === "All"
-                ? "bg-blue-500 text-white border-blue-600"
-                : "bg-white text-gray-800 border-gray-300"
-              }`}
-            onClick={() => setStatusFilter("All")}
-          >
-            All
-          </button>
-        </div>
         <ul className="space-y-2">
           {items.map((item) => (
             <li

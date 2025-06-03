@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import TradeJournalForm from "../../components/dialogs/TradeJournalForm";
 import { formatDate } from "../../utils/formatDate";
-import ListItemLayout from "../../components/layouts/ItemDetailsLayout";
+import ListItemLayout from "./ItemDetailsLayout";
 
 // --- API Consumer Functions ---
 const API_URL = import.meta.env.VITE_API_URL || "";

@@ -18,7 +18,7 @@ const initialFormState = {
   exitDate: '',
   quantity: '',
   positionSize: '',
-  stopLoss: '0',
+  stopLoss: '',
   takeProfit: '',
   pnl: '',
   fees: '',

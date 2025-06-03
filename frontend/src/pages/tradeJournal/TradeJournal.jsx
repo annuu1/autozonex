@@ -185,15 +185,14 @@ const TradeJournal = () => {
             <div>
               <span className="font-medium text-gray-600">Status:</span>{" "}
               <span
-                className={`inline-block px-2 py-1 text-sm rounded-full ${
-                  journal.status === "Closed"
+                className={`inline-block px-2 py-1 text-sm rounded-full ${journal.status === "Closed"
                     ? "bg-green-100 text-green-800"
                     : journal.status === "Open"
-                    ? "bg-blue-100 text-blue-800"
-                    : journal.status === "Cancelled"
-                    ? "bg-red-100 text-red-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
+                      ? "bg-blue-100 text-blue-800"
+                      : journal.status === "Cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-gray-100 text-gray-800"
+                  }`}
               >
                 {journal.status || "—"}
               </span>
@@ -202,11 +201,10 @@ const TradeJournal = () => {
               <span className="font-medium text-gray-600">Result:</span>{" "}
               {journal.result ? (
                 <span
-                  className={`inline-block px-2 py-1 text-sm rounded-full ${
-                    journal.result === "win"
+                  className={`inline-block px-2 py-1 text-sm rounded-full ${journal.result === "win"
                       ? "bg-green-100 text-green-800"
                       : "bg-red-100 text-red-800"
-                  }`}
+                    }`}
                 >
                   {journal.result.charAt(0).toUpperCase() + journal.result.slice(1)}
                 </span>
@@ -378,40 +376,9 @@ const TradeJournal = () => {
           Add Trade Entry
         </button>
       </div>
-      <div className="flex items-center gap-2 px-6 py-2 bg-white shadow-sm">
-        <span className="text-gray-600">Show:</span>
-        <button
-          className={`px-3 py-1 rounded-md border ${
-            statusFilter === "Open"
-              ? "bg-blue-500 text-white border-blue-600"
-              : "bg-white text-gray-800 border-gray-300"
-          }`}
-          onClick={() => setStatusFilter("Open")}
-        >
-          Open
-        </button>
-        <button
-          className={`px-3 py-1 rounded-md border ${
-            statusFilter === "Closed"
-              ? "bg-blue-500 text-white border-blue-600"
-              : "bg-white text-gray-800 border-gray-300"
-          }`}
-          onClick={() => setStatusFilter("Closed")}
-        >
-          Closed
-        </button>
-        <button
-          className={`px-3 py-1 rounded-md border ${
-            statusFilter === "All"
-              ? "bg-blue-500 text-white border-blue-600"
-              : "bg-white text-gray-800 border-gray-300"
-          }`}
-          onClick={() => setStatusFilter("All")}
-        >
-          All
-        </button>
-      </div>
       <ListItemLayout
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
         items={filteredJournals}
         selectedItem={selectedJournal}
         onSelect={(item) => {

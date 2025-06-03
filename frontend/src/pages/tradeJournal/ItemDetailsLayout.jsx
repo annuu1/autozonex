@@ -135,7 +135,7 @@ const ListItemLayout = ({
                       ? new Date(item.tradeDate).toLocaleDateString()
                       : "—"}
                   </span>
-                  <span>{item.tradeType || "—"}</span>
+                  <span>{item.result || "—"}</span>
                 </div>
                 <div className="text-xs">
                   <span

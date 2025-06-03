@@ -47,6 +47,7 @@ const TradeJournalForm = ({ editId = null, onSuccess }) => {
   const [useRiskPerTrade, setUseRiskPerTrade] = useState(false);
   const [riskPerTrade, setRiskPerTrade] = useState(100);
   const [validationErrors, setValidationErrors] = useState({});
+  const [isAdditionalDetailsOpen, setIsAdditionalDetailsOpen] = useState(false);
 
   // Fetch risk per trade
   useEffect(() => {
@@ -544,49 +545,127 @@ const TradeJournalForm = ({ editId = null, onSuccess }) => {
 
         {/* Additional Details Section */}
         <div className="border-b pb-4">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">Additional Details</h3>
+            <button
+              type="button"
+              onClick={() => setIsAdditionalDetailsOpen(!isAdditionalDetailsOpen)}
+              className="text-indigo-600 hover:text-indigo-800 focus:outline-none"
+            >
+              {isAdditionalDetailsOpen ? '-' : '+'}
+            </button>
+          </div>
+          {isAdditionalDetailsOpen && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Take Profit
+                </label>
+                <input
+                  type="number"
+                  name="takeProfit"
+                  value={form.takeProfit || ''}
+                  onChange={handleChange}
+                  min="0"
+                  step="any"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  PnL
+                </label>
+                <input
+                  type="number"
+                  name="pnl"
+                  value={form.pnl || ''}
+                  onChange={handleChange}
+                  step="any"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Fees
+                </label>
+                <input
+                  type="number"
+                  name="fees"
+                  value={form.fees || ''}
+                  onChange={handleChange}
+                  min="0"
+                  step="any"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Broker
+                </label>
+                <input
+                  type="text"
+                  name="broker"
+                  value={form.broker || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Market
+                </label>
+                <input
+                  type="text"
+                  name="market"
+                  value={form.market || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Risk/Reward Ratio
+                </label>
+                <input
+                  type="text"
+                  name="riskRewardRatio"
+                  value={form.riskRewardRatio || ''}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  value={tagsInput || ''}
+                  onChange={handleTagsChange}
+                  placeholder="e.g., swing, breakout"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {form.tags.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {form.tags.map((tag, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-800 bg-indigo-100 rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Other Details Section */}
+        <div className="border-b pb-4">
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Other Details</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Take Profit
-              </label>
-              <input
-                type="number"
-                name="takeProfit"
-                value={form.takeProfit || ''}
-                onChange={handleChange}
-                min="0"
-                step="any"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                PnL
-              </label>
-              <input
-                type="number"
-                name="pnl"
-                value={form.pnl || ''}
-                onChange={handleChange}
-                step="any"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fees
-              </label>
-              <input
-                type="number"
-                name="fees"
-                value={form.fees || ''}
-                onChange={handleChange}
-                min="0"
-                step="any"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Rate Trade
@@ -621,30 +700,6 @@ const TradeJournalForm = ({ editId = null, onSuccess }) => {
                 <option value="Paper">Paper</option>
                 <option value="Live">Live</option>
               </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tags (comma-separated)
-              </label>
-              <input
-                type="text"
-                value={tagsInput || ''}
-                onChange={handleTagsChange}
-                placeholder="e.g., swing, breakout"
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-              {form.tags.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {form.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2 py-1 text-sm font-medium text-indigo-800 bg-indigo-100 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -684,48 +739,12 @@ const TradeJournalForm = ({ editId = null, onSuccess }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Broker
-              </label>
-              <input
-                type="text"
-                name="broker"
-                value={form.broker || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Market
-              </label>
-              <input
-                type="text"
-                name="market"
-                value={form.market || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Holding Period
               </label>
               <input
                 type="text"
                 name="holdingPeriod"
                 value={form.holdingPeriod || ''}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Risk/Reward Ratio
-              </label>
-              <input
-                type="text"
-                name="riskRewardRatio"
-                value={form.riskRewardRatio || ''}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />

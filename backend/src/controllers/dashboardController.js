@@ -4,8 +4,8 @@ const TradeJournal = require('../models/TradeJournal');
 exports.getDashboardStats = async (req, res) => {
   const totalTrades = await TradeJournal.find({});
   const totalClosed = await TradeJournal.find({ status: "Closed" });
-  const wins = await TradeJournal.find({ result: 'win' });
-  const losses = await TradeJournal.find({ result: 'loss' });
+  const wins = await TradeJournal.find({ result: 'win', status: 'Closed' });
+  const losses = await TradeJournal.find({ result: 'loss', status: 'Closed' });
 
   const winRate = totalClosed.length > 0 
     ? (wins.length / totalClosed.length) * 100 
@@ -22,10 +22,13 @@ exports.getDashboardStats = async (req, res) => {
 };
 
 
-exports.getDashboardPnL = (req, res) => {
+exports.getDashboardPnL = async (req, res) => {
+  const totalTrades = await TradeJournal.find({});
+  const wins = await TradeJournal.find({ result: 'win', status: 'Closed' });
+  const losses = await TradeJournal.find({ result: 'loss', status: 'Closed' });
   res.json({
-    wins: 24,
-    losses: 6
+    wins: wins.length,
+    losses: losses.length
   });
 };
 

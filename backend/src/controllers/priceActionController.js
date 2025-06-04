@@ -133,14 +133,15 @@ exports.deletePriceAction = async (req, res) => {
 };
 
 exports.updateLastSeen = async (req, res) => {
-  let { lastDate } = req.body;
-  if(!lastDate){
-    lastDate = new Date();
+  let { lastSeen } = req.body;
+  if(!lastSeen){
+    lastSeen = new Date();
   }
   try {
+    console.log(lastSeen);
     const updatedPriceAction = await PriceAction.findByIdAndUpdate(
       req.params.id,
-      { last_seen: lastDate },
+      { last_seen: lastSeen },
       { new: true }
     );
     if (!updatedPriceAction) {

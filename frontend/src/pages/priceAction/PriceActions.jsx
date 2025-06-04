@@ -76,7 +76,20 @@ const PriceActions = () => {
     if (!item) return;
 
     setPrevLastSeen(item.last_seen);
-    await updateLastSeen(itemId);
+    if (revert) {
+      await updateLastSeen(itemId, prevLastSeen);
+      setSelected({
+        ...item,
+        last_seen: prevLastSeen,
+      });
+    }
+    else{
+      await updateLastSeen(itemId);
+      setSelected({
+        ...item,
+        last_seen: new Date(),
+      });
+    }
   };
 
 
@@ -128,12 +141,6 @@ const PriceActions = () => {
       </p>
       <p className="text-gray-600 mb-2">
         Trend Direction HTF: {item.trend_direction_HTF}
-      </p>
-      <p className="text-gray-600 mb-2">
-        EMA Alignment: {item.current_EMA_alignment}
-      </p>
-      <p className="text-gray-600 mb-2">
-        Last Seen: {item.last_seen ? new Date(item.last_seen).toLocaleDateString() : 'N/A'}
       </p>
       <p className="text-gray-600">Notes: {item.notes}</p>
       <AddPriceActionForm

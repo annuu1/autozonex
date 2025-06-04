@@ -70,10 +70,10 @@ const deletePriceAction = async (id) => {
   }
 };
 
-const updateLastSeen = async (id, lastDate) => {
+const updateLastSeen = async (id, lastSeen) => {
   try {
-    const response = await axios.put(`${API_URL}/priceActions/${id}/updateLastSeen`, {
-      headers: {...getAuthHeaders(), 'lastDate' : lastDate},
+    const response = await axios.put(`${API_URL}/priceActions/${id}/updateLastSeen`,{'lastSeen' : lastSeen}, {
+      headers: getAuthHeaders(),
     });
     return response.data;
   } catch (error) {

@@ -1,26 +1,57 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
+import { Box, Typography, IconButton, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import { GlassCard } from '../components/StyledComponents';
+import { designTokens } from '../utils/designTokens';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
+  const navLinks = [
+    { to: '/dashboard', label: 'Dashboard' },
+    { to: '/watchlist', label: 'Watchlist' },
+    { to: '/notes', label: 'Notes' },
+    { to: '/trade-journal', label: 'Trade Journal' },
+    { to: '/all-zones', label: 'All Zones' },
+    { to: '/price-actions', label: 'Price Actions' },
+    { to: '/chart', label: 'Stock Chart' },
+    { to: '/alerts', label: 'Alerts' },
+    { to: '/tradeboard', label: 'TradeBoard' },
+    { to: '/settings', label: 'Settings' },
+  ];
+
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <button
+      {/* Mobile Toggle Button (Hamburger Icon) */}
+      <IconButton
         onClick={toggleSidebar}
-        className="sm:hidden fixed top-4 left-4 z-20 p-2 bg-blue-500 text-white rounded-md"
+        sx={{
+          display: { xs: 'block', sm: 'none' },
+          position: 'fixed',
+          top: 16,
+          left: 16,
+          zIndex: 1300,
+          color: designTokens.colors.white,
+          '&:hover': {
+            color: designTokens.colors.teal,
+            transform: 'scale(1.1)',
+          },
+          transition: 'transform 0.2s ease, color 0.2s ease',
+        }}
+        aria-label={isOpen ? 'Close sidebar' : 'Open sidebar'}
       >
-        {isOpen ? 'Close' : 'Menu'}
-      </button>
+        {isOpen ? <CloseIcon /> : <MenuIcon />}
+      </IconButton>
 
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full bg-gray-800 text-white transition-transform transform ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } sm:translate-x-0 sm:w-64 w-3/4 z-10`}
+        } sm:translate-x-0 sm:w-64 w-3/4 z-1200`}
       >
         <div className="p-4">
           <h2 className="text-2xl font-bold mb-6">AutozoneX</h2>
@@ -143,10 +174,16 @@ const Sidebar = () => {
 
       {/* Overlay for Mobile */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 sm:hidden z-0"
+        <Box
           onClick={toggleSidebar}
-        ></div>
+          sx={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(30, 58, 138, 0.8)', // navyBlue with opacity
+            display: { xs: 'block', sm: 'none' },
+            zIndex: 1100,
+          }}
+        />
       )}
     </>
   );

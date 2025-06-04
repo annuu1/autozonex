@@ -1,5 +1,61 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Box, Paper, Typography, TextField, Button, CircularProgress, Alert, Link, Fade } from '@mui/material';
+import { styled, keyframes } from '@mui/material/styles';
+
+// Keyframe animation for the background gradient
+const gradientShift = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+// Styled container for the animated background
+const AnimatedBackground = styled(Box)(({ theme }) => ({
+  minWidth: '100vw',
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  background: 'linear-gradient(45deg, #1e3a8a, #06b6d4, #3b82f6, #1e3a8a)', // Navy blue to teal to blue
+  backgroundSize: '400%',
+  animation: `${gradientShift} 15s ease infinite`,
+  padding: theme.spacing(2),
+}));
+
+// Styled Paper for glassmorphism effect
+const GlassCard = styled(Paper)(({ theme }) => ({
+  maxWidth: 360,
+  width: '100%',
+  padding: theme.spacing(3),
+  background: 'rgba(255, 255, 255, 0.1)', // Semi-transparent white
+  backdropFilter: 'blur(10px)',
+  borderRadius: theme.shape.borderRadius * 2,
+  boxShadow: '0 8px 32px rgba(31, 38, 135, 0.37)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  transition: 'transform 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+  },
+}));
+
+// Styled Button with hover animation
+const AnimatedButton = styled(Button)(({ theme }) => ({
+  padding: theme.spacing(1.5),
+  fontWeight: 'bold',
+  backgroundColor: '#06b6d4', // Teal
+  '&:hover': {
+    backgroundColor: '#0891b2', // Darker teal
+    transform: 'scale(1.05)',
+    transition: 'transform 0.2s ease, background-color 0.3s',
+  },
+  '&.Mui-disabled': {
+    backgroundColor: 'rgba(6, 182, 212, 0.5)', // Faded teal when disabled
+    color: '#ffffff',
+  },
+  textTransform: 'none',
+  borderRadius: theme.shape.borderRadius * 1.5,
+}));
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -76,57 +132,94 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Sign Up</h2>
+    <AnimatedBackground>
+      <GlassCard elevation={0}>
+        <Typography
+          variant="h4"
+          component="h2"
+          align="center"
+          sx={{ fontWeight: 'bold', color: '#ffffff', mb: 2 }}
+        >
+          Create Account
+        </Typography>
+        <Typography
+          variant="body2"
+          align="center"
+          sx={{ color: '#e5e7eb', mb: 3 }}
+        >
+          Join our trading platform today
+        </Typography>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {['name', 'phone', 'email', 'password', 'confirmPassword'].map((field) => (
-            <div key={field}>
-              <label htmlFor={field} className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-                {field === 'confirmPassword' ? 'Confirm Password' : field}
-              </label>
-              <input
-                id={field}
-                type={field.includes('password') ? 'password' : field === 'email' ? 'email' : 'text'}
-                name={field}
-                value={form[field]}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
+        <Fade in={!!error}>
+          <Alert severity="error" sx={{ mb: 2, background: 'rgba(239, 68, 68, 0.1)', color: '#f87171' }}>
+            {error}
+          </Alert>
+        </Fade>
+        <Fade in={!!success}>
+          <Alert severity="success" sx={{ mb: 2, background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e' }}>
+            {success}
+          </Alert>
+        </Fade>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {[
+            { name: 'name', label: 'Name', type: 'text' },
+            { name: 'phone', label: 'Phone', type: 'tel' },
+            { name: 'email', label: 'Email', type: 'email' },
+            { name: 'password', label: 'Password', type: 'password' },
+            { name: 'confirmPassword', label: 'Confirm Password', type: 'password' },
+          ].map((field) => (
+            <TextField
+              key={field.name}
+              id={field.name}
+              label={field.label}
+              type={field.type}
+              variant="outlined"
+              fullWidth
+              required
+              value={form[field.name]}
+              onChange={handleChange}
+              name={field.name}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: '#ffffff',
+                  '& fieldset': { borderColor: 'rgba(255, 255, 255, 0.3)' },
+                  '&:hover fieldset': { borderColor: '#06b6d4' },
+                  '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
+                },
+                '& .MuiInputLabel-root': { color: 'rgba(255, 255, 255, 0.7)' },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' },
+              }}
+            />
           ))}
 
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-2 rounded text-center">{error}</div>
-          )}
-          {success && (
-            <div className="text-sm text-green-600 bg-green-50 p-2 rounded text-center">{success}</div>
-          )}
-
-          <button
+          <AnimatedButton
             type="submit"
+            variant="contained"
+            fullWidth
             disabled={loading}
-            className={`w-full py-2 text-white font-semibold rounded-md transition-colors ${
-              loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            }`}
+            startIcon={loading && <CircularProgress size={20} sx={{ color: '#ffffff' }} />}
           >
             {loading ? 'Signing up...' : 'Sign Up'}
-          </button>
-        </form>
+          </AnimatedButton>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
-          Already have an account?{' '}
-          <span
-            className="text-blue-600 hover:underline cursor-pointer"
-            onClick={() => navigate('/login')}
-          >
-            Login
-          </span>
-        </p>
-      </div>
-    </div>
+          <Typography variant="body2" align="center" sx={{ mt: 2, color: '#e5e7eb' }}>
+            Already have an account?{' '}
+            <Link
+              href="/login"
+              sx={{
+                color: '#06b6d4',
+                fontWeight: 'medium',
+                '&:hover': { textDecoration: 'underline', color: '#3b82f6' },
+              }}
+            >
+              Sign in
+            </Link>
+          </Typography>
+        </Box>
+      </GlassCard>
+    </AnimatedBackground>
   );
 };
 

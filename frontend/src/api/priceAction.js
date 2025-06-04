@@ -70,10 +70,23 @@ const deletePriceAction = async (id) => {
   }
 };
 
+const updateLastSeen = async (id, lastDate) => {
+  try {
+    const response = await axios.put(`${API_URL}/priceActions/${id}/updateLastSeen`, {
+      headers: {...getAuthHeaders(), 'lastDate' : lastDate},
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating last seen for price action with id ${id}:`, error);
+    throw error;
+  }
+};
+
 export {
   getAllPriceActions,
   getPriceAction,
   createPriceAction,
   updatePriceAction,
   deletePriceAction,
+  updateLastSeen,
 };

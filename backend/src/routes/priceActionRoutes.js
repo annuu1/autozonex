@@ -17,4 +17,6 @@ router.put("/:id", priceActionController.updatePriceAction);
 // Delete a PriceAction by ID
 router.delete("/:id", priceActionController.deletePriceAction);
 
+router.put("/:id/updateLastSeen", priceActionController.updateLastSeen);
+
 module.exports = router;

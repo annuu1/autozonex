@@ -202,21 +202,21 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Simple inputs */}
       <input
         name="trend_direction_HTF"
-        value={formData.trend_direction_HTF}
+        value={formData.trend_direction_HTF || ""}
         onChange={handleFormChange}
         placeholder="Trend Direction HTF"
         className="border p-2 rounded"
       />
       <input
         name="current_EMA_alignment"
-        value={formData.current_EMA_alignment}
+        value={formData.current_EMA_alignment || ""}
         onChange={handleFormChange}
         placeholder="EMA Alignment"
         className="border p-2 rounded"
       />
       <input
         name="confidence_score"
-        value={formData.confidence_score}
+        value={formData.confidence_score ?? ""}
         onChange={handleFormChange}
         placeholder="PA Score (1-10)"
         type="number"

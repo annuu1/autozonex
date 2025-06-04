@@ -132,3 +132,22 @@ exports.deletePriceAction = async (req, res) => {
   }
 };
 
+exports.updateLastSeen = async (req, res) => {
+  let { lastDate } = req.body;
+  if(!lastDate){
+    lastDate = new Date();
+  }
+  try {
+    const updatedPriceAction = await PriceAction.findByIdAndUpdate(
+      req.params.id,
+      { last_seen: lastDate },
+      { new: true }
+    );
+    if (!updatedPriceAction) {
+      return res.status(404).json({ error: "PriceAction not found" });
+    }
+    res.json(updatedPriceAction);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

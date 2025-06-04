@@ -36,6 +36,7 @@ const PriceActions = () => {
       current_EMA_alignment: pa.current_EMA_alignment,
       confidence_score: pa.confidence_score,
       notes: pa.notes,
+      last_seen: pa.last_seen,
     }));
     setItems(pa);
     setSelected(null);
@@ -44,8 +45,8 @@ const PriceActions = () => {
   const renderDetails = (item) => (
     <div>
       <h2 className="text-2xl font-bold mb-4">
-  {(typeof item.symbol === 'object' ? item.symbol?.symbol : item.symbol) || 'N/A'} Details
-</h2>
+        {(typeof item.symbol === 'object' ? item.symbol?.symbol : item.symbol) || 'N/A'} Details
+      </h2>
       <p className="text-gray-600 mb-2">
         Follows Demand Supply: {item.follows_demand_supply ? "✅" : "❌"}
       </p>
@@ -54,6 +55,9 @@ const PriceActions = () => {
       </p>
       <p className="text-gray-600 mb-2">
         EMA Alignment: {item.current_EMA_alignment}
+      </p>
+      <p className="text-gray-600 mb-2">
+        Last Seen: {item.last_seen ? new Date(item.last_seen).toLocaleDateString() : 'N/A'}
       </p>
       <p className="text-gray-600">Notes: {item.notes}</p>
       <AddPriceActionForm

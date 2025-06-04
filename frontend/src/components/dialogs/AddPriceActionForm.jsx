@@ -113,6 +113,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
     const cleanArray = (arr) =>
       (arr || []).map(({ _id, ...rest }) => (_id && _id !== '' ? { _id, ...rest } : rest))
         .filter(item => Object.values(item).some(val => val !== '' && val != null));
+    const todayISO = new Date().toISOString();
     const dataToSubmit = {
       ...formData,
       _id: priceAction?._id || undefined,
@@ -123,6 +124,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       trade_setups: formData.trade_setups.filter(setup => setup !== ''),
       positives: formData.positives.filter(pos => pos !== ''),
       negatives: formData.negatives.filter(neg => neg !== ''),
+      last_seen: todayISO,
     };
     onSubmit(dataToSubmit);
   };
@@ -164,6 +166,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
         positives: priceAction.positives?.length ? priceAction.positives : [''],
         negatives: priceAction.negatives?.length ? priceAction.negatives : [''],
         participants: priceAction.participants?.length ? priceAction.participants : [{ user: '' }],
+        last_seen: new Date().toISOString(), // Always set to today
       }));
       setSymbolInput(priceAction.symbol?.symbol || priceAction.symbol || '');
     }

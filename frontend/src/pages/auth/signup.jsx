@@ -25,7 +25,7 @@ const AnimatedBackground = styled(Box)(({ theme }) => ({
 
 // Styled Paper for glassmorphism effect
 const GlassCard = styled(Paper)(({ theme }) => ({
-  maxWidth: 360,
+  maxWidth: 460,
   width: '100%',
   padding: theme.spacing(3),
   background: 'rgba(255, 255, 255, 0.1)', // Semi-transparent white

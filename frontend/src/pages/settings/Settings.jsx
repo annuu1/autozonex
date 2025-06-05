@@ -9,6 +9,7 @@ const Settings = () => {
   const [formMode, setFormMode] = useState('add');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showChatId, setShowChatId] = useState(false);
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -78,6 +79,7 @@ const Settings = () => {
     setError('');
     setSuccess('');
     try {
+      const token = localStorage.getItem('token');
       await deleteSettings(token);
       setSettings(null);
       setSuccess('Settings deleted successfully.');
@@ -118,6 +120,28 @@ const Settings = () => {
                 <p className="text-gray-600">Risk Per Trade:</p>
                 <p className="text-xl font-semibold">{settings.riskPerTrade} -/</p>
               </div>
+
+              {settings.telegramChatId && (
+                <div>
+                  <p className="text-gray-600 mb-1">Telegram Chat ID:</p>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-mono text-lg">
+                      {showChatId
+                        ? settings.telegramChatId
+                        : settings.telegramChatId.length > 4
+                          ? '*'.repeat(settings.telegramChatId.length - 4) + settings.telegramChatId.slice(-4)
+                          : '****'}
+                    </span>
+                    <button
+                      className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
+                      type="button"
+                      onClick={() => setShowChatId((prev) => !prev)}
+                    >
+                      {showChatId ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="flex space-x-3">
                 <button

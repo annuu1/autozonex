@@ -6,13 +6,13 @@ const Settings = require('../models/Settings');
 const createSettings = async (req, res) => {
     try {
         const userId = req.user._id;
-        const { riskPerTrade } = req.body;
+        const { riskPerTrade, telegramChatId } = req.body;
         // Check if settings already exist for this user
         const existing = await Settings.findOne({ userId });
         if (existing) {
             return res.status(400).json({ error: 'Settings already exist for this user.' });
         }
-        const settings = new Settings({ userId, riskPerTrade });
+        const settings = new Settings({ userId, riskPerTrade, telegramChatId });
         await settings.save();
         res.status(201).json(settings);
     } catch (err) {

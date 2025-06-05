@@ -9,6 +9,9 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
   const [riskPerTrade, setRiskPerTrade] = useState(
     existingSettings?.riskPerTrade || ""
   );
+  const [telegramChatId, setTelegramChatId] = useState(
+    existingSettings?.telegramChatId || ""
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -24,10 +27,10 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
 
     try {
       if (settingsId) {
-        await updateSettings({ riskPerTrade }, token);
+        await updateSettings({ riskPerTrade, telegramChatId }, token);
         setSuccess("Settings updated successfully.");
       } else {
-        await createSettings({ riskPerTrade }, token);
+        await createSettings({ riskPerTrade, telegramChatId }, token);
         setSuccess("Settings created successfully.");
       }
       onClose && onClose();
@@ -100,6 +103,30 @@ const SettingsForm = ({ open, onClose, existingSettings }) => {
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="telegramChatId"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Telegram Chat ID
+            </label>
+            <input
+              id="telegramChatId"
+              type="text"
+              value={telegramChatId}
+              onChange={(e) => setTelegramChatId(e.target.value)}
+              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. 123456789"
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              To find your Telegram Chat ID:<br />
+              1. Open your Telegram app and search for your notification bot.<br />
+              2. Send <span className="bg-gray-200 px-1 rounded">/start</span> to the bot.<br />
+              3. The bot will reply with your chat ID.<br />
+              4. Copy and paste that chat ID here.
+            </div>
           </div>
 
           {error && (

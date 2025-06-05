@@ -33,7 +33,11 @@ export const updateSettings = async (settingsData, token) => {
 };
 
 // Delete settings for the authenticated user
-export const deleteSettings = async () => {
-  const response = await axios.delete(API_URL);
+export const deleteSettings = async (token) => {
+  const response = await axios.delete(API_URL, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
   return response.data;
 };

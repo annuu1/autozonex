@@ -9,7 +9,11 @@ const settingsSchema = new mongoose.Schema({
     riskPerTrade: {
         type: Number,
         default: 0.01,
-    }    
+    },
+    telegramChatId: {
+        type: String,
+        default: null,
+    },    
 })
 
 const Settings = mongoose.model('Settings', settingsSchema);

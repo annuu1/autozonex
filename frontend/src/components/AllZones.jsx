@@ -115,13 +115,13 @@ const AllZones = () => {
         className={
           `transition-all duration-300 ease-in-out
           ${isFloatingList
-            ? 'fixed left-0 top-4 z-[110] w-[250px] opacity-50 hover:opacity-95 bg-white/80 border border-gray-300 shadow-xl p-2 cursor-pointer group'
+            ? 'fixed left-0 top-4 z-[1400] w-[250px] opacity-100 hover:opacity-100 bg-white/80 border border-gray-300 shadow-xl p-2 cursor-pointer group'
             : 'w-[18vw] min-w-[180px] max-w-[260px] border-r border-gray-300 bg-white p-3 opacity-100 relative'}
         `
         }
         style={isFloatingList ? {height: 'calc(100vh - 2rem)'} : {}}
-        onMouseEnter={isFloatingList ? (e) => e.currentTarget.style.opacity = 0.95 : undefined}
-        onMouseLeave={isFloatingList ? (e) => e.currentTarget.style.opacity = 0.5 : undefined}
+        onMouseEnter={isFloatingList ? (e) => e.currentTarget.style.opacity = 1 : undefined}
+        onMouseLeave={isFloatingList ? (e) => e.currentTarget.style.opacity = 1 : undefined}
       >
         <button
           onClick={() => setIsFloatingList((prev) => !prev)}

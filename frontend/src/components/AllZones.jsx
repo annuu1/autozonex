@@ -8,6 +8,7 @@ import { getDailyDemandZones } from '../api/zone';
 const AllZones = () => {
   const chartLayouts = ['default', 'allTimeframes'];
   const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
+  const [isFloatingList, setIsFloatingList] = useState(false);
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -98,6 +99,10 @@ const AllZones = () => {
         e.preventDefault();
         setCurrentChartLayoutIndex((prevIndex) => (prevIndex + 1) % chartLayouts.length);
       }
+      if (e.key === 'i' || e.key === 'I') {
+        e.preventDefault();
+        setIsFloatingList((prev) => !prev);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -106,7 +111,25 @@ const AllZones = () => {
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Left List Section */}
-      <div className="w-1/3 border-r border-gray-300 overflow-y-auto p-4 bg-white">
+      <div
+        className={
+          `transition-all duration-300 ease-in-out
+          ${isFloatingList
+            ? 'fixed left-0 top-4 z-[110] w-[250px] opacity-50 hover:opacity-95 bg-white/80 border border-gray-300 shadow-xl p-2 cursor-pointer group'
+            : 'w-[18vw] min-w-[180px] max-w-[260px] border-r border-gray-300 bg-white p-3 opacity-100 relative'}
+        `
+        }
+        style={isFloatingList ? {height: 'calc(100vh - 2rem)'} : {}}
+        onMouseEnter={isFloatingList ? (e) => e.currentTarget.style.opacity = 0.95 : undefined}
+        onMouseLeave={isFloatingList ? (e) => e.currentTarget.style.opacity = 0.5 : undefined}
+      >
+        <button
+          onClick={() => setIsFloatingList((prev) => !prev)}
+          className="mb-2 px-2 py-1 rounded text-xs bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          title={isFloatingList ? 'Show Full List (i)' : 'Float/Compact List (i)'}
+        >
+          {isFloatingList ? '⮞' : '☰'}
+        </button>
         <h2 className="text-xl font-semibold mb-4">Zones</h2>
         <div className="mb-4 flex gap-2">
           <input
@@ -169,7 +192,7 @@ const AllZones = () => {
         </div>
       </div>
       {/* Right Detail Section */}
-      <div className="w-2/3 overflow-y-auto p-6 flex flex-col">
+      <div className={`${isFloatingList ? 'w-full flex-1' : 'w-2/3'} overflow-y-auto p-6 flex flex-col`}>
         <h1 className="text-2xl font-bold mb-4">AutozoneX Dashboard</h1>
         {selectedZone ? (
           <>

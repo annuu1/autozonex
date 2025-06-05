@@ -8,8 +8,10 @@ import { designTokens } from '../utils/designTokens';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
+  const handleDoubleClick = () => setIsHidden(true);
 
   const navLinks = [
     { to: '/dashboard', label: 'Dashboard' },
@@ -52,6 +54,8 @@ const Sidebar = () => {
         className={`fixed top-0 left-0 h-full bg-gray-800 text-white transition-transform transform ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } sm:translate-x-0 sm:w-64 w-3/4 z-1200`}
+        onDoubleClick={handleDoubleClick}
+        style={{ display: isHidden ? 'none' : 'block' }}
       >
         <div className="p-4">
           <h2 className="text-2xl font-bold mb-6">AutozoneX</h2>

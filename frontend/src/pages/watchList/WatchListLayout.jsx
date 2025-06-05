@@ -51,6 +51,8 @@ const WatchListLayout = () => {
   const [symbolAddError, setSymbolAddError] = useState('');
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const chartLayouts = ['default', 'allTimeframes'];
+  const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
   const fullscreenRef = useRef(null);
 
   // Fetch watchlists
@@ -157,14 +159,16 @@ const WatchListLayout = () => {
   };
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey && e.key === 'f') || e.key === 'F' || e.key === 'f') {
+      // Removed 'f' key binding for fullscreen
+      // New 'l' key binding for toggling chart layouts
+      if (e.key === 'D' || e.key === 'C') {
         e.preventDefault();
-        toggleFullscreen();
+        setCurrentChartLayoutIndex((prevIndex) => (prevIndex + 1) % chartLayouts.length);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [chartLayouts.length]);
 
   return (
     <Box className="flex flex-col h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
@@ -329,20 +333,35 @@ const WatchListLayout = () => {
               }`}
             >
               <Box className="flex justify-between items-center">
-                <Typography variant="h5">{selectedSymbol}</Typography>
+                <Typography variant="h5">{selectedSymbol} ({
+                  chartLayouts[currentChartLayoutIndex] === 'allTimeframes'? '60m, 5m, 15m': '1d, 1wk, 1mo'
+                  })</Typography>
                 <IconButton onClick={toggleFullscreen}>
                   {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
                 </IconButton>
               </Box>
               <Divider className="mb-4" />
               <div>
-                <div>
-                  <StockChart ticker={selectedSymbol} />
-                </div>
-                <div className="flex flex-col md:flex-row gap-4 mt-6">
-                  <StockChart ticker={selectedSymbol} timeFrame="1wk" />
-                  <StockChart ticker={selectedSymbol} timeFrame="1mo" />
-                </div>
+                {chartLayouts[currentChartLayoutIndex] === 'default' && (
+                  <>
+                    <div>
+                      <StockChart ticker={selectedSymbol} />
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-4 mt-6">
+                      <StockChart ticker={selectedSymbol} timeFrame="1wk" />
+                      <StockChart ticker={selectedSymbol} timeFrame="1mo" />
+                    </div>
+                  </>
+                )}
+                {chartLayouts[currentChartLayoutIndex] === 'allTimeframes' && (
+                  <>
+                  <StockChart ticker={selectedSymbol} timeFrame="60m" />
+                  <div className="flex flex-col md:flex-row gap-4 mt-6">
+                    <StockChart ticker={selectedSymbol} timeFrame="5m" />
+                    <StockChart ticker={selectedSymbol} timeFrame="15m" />
+                  </div>
+                  </>
+                )}
               </div>
             </Box>
           ) : (

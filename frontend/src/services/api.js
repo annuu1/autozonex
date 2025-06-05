@@ -4,8 +4,13 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export const fetchCandles = async (ticker, timeFrame) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/candles/${ticker}/${timeFrame}`);
+    if(timeFrame === '1d' || timeFrame === '1wk' || timeFrame === '1mo'){
+      const response = await axios.get(`${API_BASE_URL}/candles/${ticker}/${timeFrame}`);
     return response.data;
+    }else{
+      const response = await axios.get(`${API_BASE_URL}/candles/${ticker}/${timeFrame}/ltf`);
+    return response.data;
+    }
   } catch (error) {
     throw new Error(error.response?.data?.error || 'Failed to fetch candlestick data');
   }

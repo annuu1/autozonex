@@ -214,7 +214,7 @@ const AllZones = () => {
               )}
               {chartLayouts[currentChartLayoutIndex] === 'allTimeframes' && (
                 <>
-                <StockChart ticker={selectedZone.ticker} timeFrame={"60m"} selectedZon e={selectedZone} />
+                <StockChart ticker={selectedZone.ticker} timeFrame={"60m"} selectedZone={selectedZone} />
                 <div className="flex gap-4">
                   
                   <StockChart ticker={selectedZone.ticker} timeFrame={"5m"} selectedZone={selectedZone} />

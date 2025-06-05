@@ -114,7 +114,7 @@ const aggregateCandles = (candles, targetIntervalMinutes, marketOpen = '09:15:00
 
 // Fetch stock data using historical() (normalized to consistent format)
 // TODO: Replace historical() with chart() or another provider (e.g., Alpha Vantage) when stable
-const fetchStockData = async (ticker, options, interval = '1d') => {
+const fetchStockData = async (ticker, options, interval = '75m') => {
   try {
     // Validate inputs
     if (!ticker || !ticker.match(/^[A-Z0-9]+\.(NS|BO)$/)) {
@@ -171,35 +171,37 @@ const fetchStockData = async (ticker, options, interval = '1d') => {
 
 
 // Supports lower time frames (5m, 15m, 30m, 45m, 60m, 4h) and custom intervals (75m, 125m)
-const fetchLTFdata = async (ticker, options, interval = '75m') => {
+const fetchLTFdata = async (ticker, options, interval = '5m') => {
   try {
     // Validate inputs
     if (!ticker || !ticker.match(/^[A-Z0-9]+\.(NS|BO)$/)) {
       throw new Error(`Invalid ticker format: ${ticker}. Use NSE/BSE ticker (e.g., RELIANCE.NS)`);
     }
-    if (!options || !options.interval) {
-      throw new Error('Missing required option: interval');
-    }
+    // if (!options || !options.interval) {
+    //   throw new Error('Missing required option: interval');
+    // }
 
     // Supported intervals
-    const supportedIntervals = ['5m', '15m', '30m', '60m', '1d', '1wk', '1mo', '75m', '125m'];
+    const supportedIntervals = ['5m', '15m', '30m', '60m', '1d', '1wk', '1mo', '75m', '125m', '4h'];
     if (!supportedIntervals.includes(interval)) {
       throw new Error(`Unsupported interval: ${interval}. Supported: ${supportedIntervals.join(', ')}`);
     }
 
     // Normalize period1 and period2 to Date objects
-    const period1 = toDate(options.period1);
-    const period2 = toDate(options.period2);
+    const period1 = toDate(options.period2||new Date(new Date().getTime() - 240 * 60 * 60 * 1000).toUTCString());
+    const period2 = toDate(options.period1||new Date().toUTCString());
 
     // Determine fetch method and interval
     const historicalIntervals = ['1d', '1wk', '1mo'];
-    const chartIntervals = ['5m', '15m', '30m', '60m'];
+    const chartIntervals = ['5m', '15m', '30m', '60m', '4h'];
     const aggregateIntervals = {
       '75m': 75,
       '125m': 125,
     };
 
     let candles;
+    console.log('Period1:', period1.toISOString());
+    console.log('Period2:', period2.toISOString());
     if (historicalIntervals.includes(interval)) {
       // Use historical() for daily, weekly, monthly
       const historicalOptions = {
@@ -214,7 +216,7 @@ const fetchLTFdata = async (ticker, options, interval = '75m') => {
         interval,
       })}`);
 
-      candles = await retry(() => yahooFinance.historical(ticker, historicalOptions));
+      candles = await retry(() => yahooFinance.chart(ticker, historicalOptions));
     } else {
       // Use chart() for intraday intervals or as base for aggregation
       const fetchInterval = aggregateIntervals[interval] ? '5m' : interval;

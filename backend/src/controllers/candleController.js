@@ -1,5 +1,6 @@
 const yahooFinance = require('yahoo-finance2').default;
 const winston = require('winston');
+const { fetchLTFdata } = require('../utils/yahooFinanceUtil');
 
 // Retry utility for API calls
 const retry = async (fn, retries = 3, delay = 1000) => {
@@ -63,4 +64,16 @@ const getCandles = async (req, res) => {
   
 };
 
-module.exports = { getCandles };
+const getLTFCandles = async (req, res) => {
+  const { ticker, timeFrame } = req.params;
+  try {
+    const candles = await fetchLTFdata(ticker, {}, timeFrame );
+    res.status(200).json(candles);
+  } catch (error) {
+    winston.error(`Error fetching LTF candles for ${ticker}: ${error.message || error}`);
+    const safeMessage = typeof error === 'string' ? error : error?.message || 'Unknown error occurred';
+    res.status(500).json({ error: safeMessage });
+  }
+}
+
+module.exports = { getCandles, getLTFCandles };

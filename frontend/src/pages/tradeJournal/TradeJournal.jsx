@@ -85,20 +85,11 @@ const TradeJournal = () => {
     // eslint-disable-next-line
   }, [authLoading, user]);
 
-  // Add or update trade
-  const handleFormSubmit = async (form) => {
-    try {
-      if (editData && editData._id) {
-        await updateTradeJournal(editData._id, form);
-      } else {
-        await addTradeJournal(form);
-      }
-      setEditData(null);
-      setSelectedJournal(null);
-      loadJournals();
-    } catch (err) {
-      alert("Error saving trade entry.");
-    }
+  // Handle form success (after create/update)
+  const handleFormSubmit = async () => {
+    setEditData(null);
+    setSelectedJournal(null);
+    loadJournals();
   };
 
   // Open add form

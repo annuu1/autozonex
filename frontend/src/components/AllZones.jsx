@@ -95,7 +95,7 @@ const AllZones = () => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'l' || e.key === 'L') {
+      if (e.key === 'D' || e.key === 'C') {
         e.preventDefault();
         setCurrentChartLayoutIndex((prevIndex) => (prevIndex + 1) % chartLayouts.length);
       }

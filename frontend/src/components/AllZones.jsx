@@ -6,8 +6,8 @@ import { formatNumber } from '../utils/formatNumber';
 import { getDailyDemandZones } from '../api/zone';
 
 const AllZones = () => {
-  const [ticker, setTicker] = useState('RELIANCE.NS');
-  const [timeFrame, setTimeFrame] = useState('1d');
+  const chartLayouts = ['default', 'allTimeframes'];
+  const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
   const [zones, setZones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -92,6 +92,17 @@ const AllZones = () => {
   
 
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        setCurrentChartLayoutIndex((prevIndex) => (prevIndex + 1) % chartLayouts.length);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [chartLayouts.length]);
+
   return (
     <div className="flex h-screen w-full bg-gray-50">
       {/* Left List Section */}
@@ -165,15 +176,29 @@ const AllZones = () => {
             {/* Chart at the bottom */}
             <div className="mt-auto">
               <h2 className="text-xl font-bold mb-4 text-gray-600">
-                Chart for {selectedZone.ticker} ({selectedZone.timeFrame})
+                Chart for {selectedZone.ticker} ({chartLayouts[currentChartLayoutIndex] === 'default' ? '1d, 1wk, 1mo' : '60m, 5m, 15m'})
               </h2>
-              <div>
-              <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
-              </div>
-              <div className="flex gap-4">
-              <StockChart ticker={selectedZone.ticker} timeFrame={"1wk"} selectedZone={selectedZone} />
-              <StockChart ticker={selectedZone.ticker} timeFrame={"1mo"} selectedZone={selectedZone} />
-              </div>
+              {chartLayouts[currentChartLayoutIndex] === 'default' && (
+                <>
+                  <div>
+                    <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
+                  </div>
+                  <div className="flex gap-4">
+                    <StockChart ticker={selectedZone.ticker} timeFrame={"1wk"} selectedZone={selectedZone} />
+                    <StockChart ticker={selectedZone.ticker} timeFrame={"1mo"} selectedZone={selectedZone} />
+                  </div>
+                </>
+              )}
+              {chartLayouts[currentChartLayoutIndex] === 'allTimeframes' && (
+                <>
+                <StockChart ticker={selectedZone.ticker} timeFrame={"60m"} selectedZon e={selectedZone} />
+                <div className="flex gap-4">
+                  
+                  <StockChart ticker={selectedZone.ticker} timeFrame={"5m"} selectedZone={selectedZone} />
+                  <StockChart ticker={selectedZone.ticker} timeFrame={"15m"} selectedZone={selectedZone} />
+                </div>
+                </>
+              )}
             </div>
             <div className="mb-6">
               <h2 className="text-xl font-bold mb-2">Zone Details</h2>

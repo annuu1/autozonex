@@ -25,24 +25,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import { createAlert, getAlerts } from "../../api/alert";
 import {useAuth} from "../../hooks/useAuth"
-
-// Dummy data and functions for demonstration
-const dummyAlerts = [
-  {
-    id: 1,
-    ticker: "AAPL",
-    condition: "Above",
-    alertPrice: 180,
-    note: "Breakout watch",
-  },
-  {
-    id: 2,
-    ticker: "TSLA",
-    condition: "Below",
-    alertPrice: 600,
-    note: "",
-  },
-];
+import {useSettings} from "../../hooks/useSettings"
 
 const Alert = () => {
   const [alerts, setAlerts] = useState([]);
@@ -57,12 +40,16 @@ const Alert = () => {
   const [alertPrice, setAlertPrice] = useState("");
   const [note, setNote] = useState("");
   const {user} = useAuth(); 
+  const {settings} = useSettings();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     // Replace with API call
     const fetchAlerts = async ()=>{
+        setLoading(true);
         const alerts = await getAlerts(user.email)
         setAlerts(alerts.data.alerts)
+        setLoading(false);
     }
     fetchAlerts()
     // setAlerts(dummyAlerts);
@@ -93,7 +80,12 @@ const Alert = () => {
   const handleAddSubmit = () => {
     // Replace with API call
     const addAlert = async()=>{
-        const alert = await createAlert({userEmail : user.email, ticker, condition,alertPrice: parseFloat(alertPrice), note});
+      if(!settings){
+        window.alert("To get alert on telegram, you should set your telegram chat id in settings");
+        return;
+      }
+      
+        const alert = await createAlert({userEmail : user.email, ticker, condition,alertPrice: parseFloat(alertPrice), note, telegramChatId: settings.telegramChatId});
         if(alert.success){
           setAlerts([
             ...alerts,
@@ -137,8 +129,18 @@ const Alert = () => {
     if (!str) return "";
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
-  
 
+  if(loading){
+    return (
+      <div className="flex justify-center my-8">
+        {/* <CircularProgress /> */}
+        <div className="flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-dashed border-gray-300 rounded-full animate-spin"></div>
+          <div className="ml-4 text-gray-500">Loading...</div>
+        </div>
+      </div>
+    ) 
+  }
   return (
     <Box className="flex flex-col items-center w-full min-h-screen bg-gray-50 py-8">
       <Paper className="w-full max-w-2xl p-6 shadow-md">

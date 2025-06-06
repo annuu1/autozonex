@@ -36,7 +36,6 @@ const Sidebar = () => {
     { id: 'chart', to: '/chart', label: 'Stock Chart', icon: LineChart },
     { id: 'alerts', to: '/alerts', label: 'Alerts', icon: Bell },
     { id: 'tradeboard', to: '/tradeboard', label: 'TradeBoard', icon: PieChart },
-    { id: 'settings', to: '/settings', label: 'Settings', icon: Settings },
   ];
 
   const bottomItems = [

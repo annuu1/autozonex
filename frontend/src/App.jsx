@@ -17,6 +17,7 @@ import WatchList from './pages/watchList/WatchList';
 import Alert from './pages/alert/Alert';
 import PriceActions from './pages/priceAction/PriceActions';
 import Symbols from './pages/symbol/Symbols';
+import DMATs from './pages/dmat/DMATs';
 
 const App = () => {
   return (
@@ -158,6 +159,16 @@ const App = () => {
         <MainLayout>
           <ProtectedRoute>
             <Symbols />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+      <Route
+      path = "/dmat"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <DMATs />
           </ProtectedRoute>
         </MainLayout>
       }

@@ -20,6 +20,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { getNotes, createNote, updateNote, deleteNote } from "../../api/note";
 import AddNote from "../../components/dialogs/AddNote";
+import { format } from "date-fns";
 
 const Note = () => {
   const [notes, setNotes] = useState([]);
@@ -112,6 +113,9 @@ const Note = () => {
             <Grid span={12} sm={6} md={4} key={note._id}>
               <Card>
                 <CardContent>
+                <Typography variant="caption" color="text.secondary" display="block" mt={0}>
+                    {note.createdAt ? format(new Date(note.createdAt), "MMM dd, yyyy, hh:mm a") : ""}
+                  </Typography>
                   <Typography variant="h6" gutterBottom>
                     {note.title}
                   </Typography>

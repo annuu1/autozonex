@@ -204,7 +204,7 @@ const Dashboard = () => {
         {statItems.map((stat, index) => (
           <Grid item xs={12} sm={6} lg={3} key={index}>
             {loading ? (
-              <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3 }} />
+              <Skeleton variant="rectangular\" height={160} sx={{ borderRadius: 3 }} />
             ) : (
               <MetricCard color={stat.color}>
                 <CardContent sx={{ p: 0 }}>

@@ -7,8 +7,10 @@ const CAPS = [50, 150, 250, 500];
 
 // Channel IDs visible to user
 const TELEGRAM_CHANNELS = [
-  { id: "5293401511", name: "Channel 1" },
+  { id: "-1002041280613", name: "Premium Channel" },
   { id: "-1002187821708", name: "Premium Chats" },
+  { id: "-1002384605356", name: "Equity" },
+  { id: "-1002269659948", name: "Algo Pulse" },
 ];
 
 // Tracker channel (not shown in UI, always receives all messages)

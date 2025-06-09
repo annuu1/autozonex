@@ -1,14 +1,19 @@
 import React from "react";
 
-export default function MessagePreview({ symbol, entry, sl, tgt, qtyPerCap }) {
-  const ps = Object.entries(qtyPerCap)
-    .map(([cap, qty]) => `${cap}(${qty}qty)`).join(", ");
+export default function MessagePreview({ symbol, entry, sl, tgt, qtyPerCap, note, formattedMessage }) {
+  // Render the formatted Telegram message if provided
   return (
-    <div style={{ background: "#f8f9fa", padding: 16, borderRadius: 8, minHeight: 120 }}>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Message Preview</div>
-      <pre style={{ margin: 0, fontFamily: "inherit" }}>{
-        `symbol - ${symbol || ""},\nentry- ${entry || ""}\nsl- ${sl || ""}\ntgt- ${tgt || ""}\n\nPS- ${ps}`
-      }</pre>
+    <div className="bg-[#f8f9fa] p-4 rounded-lg min-h-[120px]">
+      <div className="font-semibold mb-2">Message Preview</div>
+      <pre className="whitespace-pre-wrap font-mono text-sm" style={{ margin: 0 }}>
+        {formattedMessage ? formattedMessage : (() => {
+          const ps = Object.entries(qtyPerCap || {})
+            .map(([cap, qty]) => `${cap}(${qty}qty)`).join(", ");
+          return `symbol - ${symbol || ""},\nentry- ${entry || ""}\nsl- ${sl || ""}\ntgt- ${tgt || ""}\n\nPS- ${ps}${note ? `\n\nNote: ${note}` : ""}`;
+        })()}
+      </pre>
+      <div className="mt-2 text-xs text-gray-500">This is how your message will appear on Telegram.</div>
     </div>
   );
 }
+

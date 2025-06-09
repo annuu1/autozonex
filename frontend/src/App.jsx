@@ -18,6 +18,7 @@ import Alert from './pages/alert/Alert';
 import PriceActions from './pages/priceAction/PriceActions';
 import Symbols from './pages/symbol/Symbols';
 import DMATs from './pages/dmat/DMATs';
+import Tool from './pages/tool/Tool';
 
 const App = () => {
   return (
@@ -169,6 +170,16 @@ const App = () => {
         <MainLayout>
           <ProtectedRoute>
             <DMATs />
+          </ProtectedRoute>
+        </MainLayout>
+      }
+      />
+      <Route
+      path = "/tool"
+      element = {
+        <MainLayout>
+          <ProtectedRoute>
+            <Tool />
           </ProtectedRoute>
         </MainLayout>
       }

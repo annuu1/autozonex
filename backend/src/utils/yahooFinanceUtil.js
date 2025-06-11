@@ -114,7 +114,7 @@ const aggregateCandles = (candles, targetIntervalMinutes, marketOpen = '09:15:00
 
 // Fetch stock data using historical() (normalized to consistent format)
 // TODO: Replace historical() with chart() or another provider (e.g., Alpha Vantage) when stable
-const fetchStockData = async (ticker, options, interval = '75m') => {
+const fetchStockData = async (ticker, options, interval = '1d') => {
   try {
     // Validate inputs
     if (!ticker || !ticker.match(/^[A-Z0-9]+\.(NS|BO)$/)) {

@@ -748,39 +748,39 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
             logger.warn(`Insufficient data for ${ticker} (${timeFrame})`);
             return [];
           }
-      
+
           const zones = [];
-      
+
           for (let j = candles.length - 1; j >= 2; j--) {
             const currentCandle = candles[j];
             const candleDate = new Date(currentCandle.date);
             candleDate.setHours(0, 0, 0, 0);
-      
+
             if (candleDate.getTime() !== target.getTime()) continue;
-      
+
             // Check leg-out condition
             const isLegOutGreen = currentCandle.close > currentCandle.open;
             const priorHigh = Math.max(...candles.slice(Math.max(j - 3, 0), j).map(c => c.high));
             const range = currentCandle.high - currentCandle.low;
-            const bodyPct = Math.abs(currentCandle.close - currentCandle.open) / range*100;
+            const bodyPct = Math.abs(currentCandle.close - currentCandle.open) / range * 100;
             const isLegOutValid = isLegOutGreen && currentCandle.close > priorHigh && bodyPct > 50;
-      
+
             logger.info(`🟢 Checking Leg-Out for ${ticker} on ${currentCandle.date}: Close=${currentCandle.close}, Open=${currentCandle.open}, PriorHigh=${priorHigh}, isGreen=${isLegOutGreen}, isValid=${isLegOutValid}`);
-      
+
             if (isLegOutValid) {
               const legOut = currentCandle;
               let baseCandles = [];
               let baseCount = 0;
               let k = j - 1;
-      
+
               while (k >= 0 && baseCount < 5) {
                 const prevCandle = candles[k];
                 const body = Math.abs(prevCandle.close - prevCandle.open);
                 const range = prevCandle.high - prevCandle.low;
                 const isBaseCandle = range > 0 && body / range < 0.5;
-      
+
                 logger.info(`🔹${ticker} Base check at ${prevCandle.date}: Range=${range}, Body=${body}, Ratio=${(body / range).toFixed(2)}, isBase=${isBaseCandle}`);
-      
+
                 if (isBaseCandle) {
                   baseCandles.push(prevCandle);
                   baseCount++;
@@ -790,30 +790,30 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
                   break;
                 }
               }
-      
+
               // Check leg-in
               if (baseCount >= 1 && k >= 0) {
                 const legIn = candles[k];
                 const body = Math.abs(legIn.close - legIn.open);
                 const range = legIn.high - legIn.low;
                 const isLegIn = range > 0 && body / range > 0.5;
-      
+
                 const isDBR = legIn.close < legIn.open;
                 const isRBR = legIn.close > legIn.open;
-      
+
                 logger.info(`🔻 Leg-In check at ${legIn.date}: Range=${range}, Body=${body}, Ratio=${(body / range).toFixed(2)}, isLegIn=${isLegIn}, DBR=${isDBR}, RBR=${isRBR}`);
-      
+
                 if (isLegIn && (isDBR || isRBR)) {
                   const proximalLine = Math.max(...baseCandles.map(c => Math.max(c.close, c.open)));
                   const distalLine = Math.min(...baseCandles.map(c => c.low));
-      
+
                   const freshness = await getFreshness(ticker, timeFrame, proximalLine, distalLine, legOut.date);
                   const strength = (legOut.high - legOut.low) > (baseCandles[baseCandles.length - 1].high - baseCandles[baseCandles.length - 1].low) * 2 ? 2 : 1;
                   const timeAtBase = baseCount <= 3 ? 2 : baseCount <= 5 ? 1 : 0;
                   const tradeScore = freshness + strength + timeAtBase;
-      
+
                   logger.info(`📊 Zone Candidate for ${ticker} on ${legOut.date} | Proximal=${proximalLine}, Distal=${distalLine}, Freshness=${freshness}, Strength=${strength}, TimeAtBase=${timeAtBase}, TradeScore=${tradeScore}`);
-      
+
                   if (tradeScore >= 4) {
                     const zone = {
                       ticker,
@@ -843,20 +843,20 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
           return [];
         }
       });
-      
+
 
       const results = await Promise.allSettled(promises);
-  const batchZones = results
-    .filter(result => result.status === 'fulfilled')
-    .map(result => result.value)
-    .flat();
-  allZones.push(...batchZones);
+      const batchZones = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => result.value)
+        .flat();
+      allZones.push(...batchZones);
 
-  // Delay between batches to avoid rate limits
-  if (i + batchSize < tickers.length) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
-}
+      // Delay between batches to avoid rate limits
+      if (i + batchSize < tickers.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
 
     // Save zones to MongoDB
     if (allZones.length > 0) {
@@ -871,7 +871,7 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
         }
       }
     }
-    
+
 
     return allZones;
   } catch (err) {
@@ -880,6 +880,207 @@ const identifyDailyDemandZones = async (timeFrame = '1d', tickers = NSE_TICKERS,
   }
 };
 
+const detectZones = async (timeFrame = '1wk', tickers = NSE_TICKERS, targetDate = null) => {
+  try {
+    // Validate timeFrame
+    if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
+      throw new Error('Invalid timeFrame. Use 1d, 1wk, or 1mo.');
+    }
+
+    // Set target date (default to today)
+    const target = targetDate ? new Date(targetDate) : new Date();
+    target.setHours(0, 0, 0, 0); // Start of target date
+
+    // Log processing details
+    logger.info(`Processing ${timeFrame} zones for target date ${target.toISOString().split('T')[0]}`);
+
+    // Check for cached zones for the target date
+    const cachedZones = await Zone.find({
+      timeFrame,
+      type: 'demand',
+      legOutDate: {
+        $gte: target,
+        $lt: new Date(target.getTime() + 24 * 60 * 60 * 1000),
+      },
+      ticker: { $in: tickers },
+    });
+
+    if (cachedZones.length > 0) {
+      logger.info(`Returning ${cachedZones.length} cached zones for ${timeFrame} on ${target.toISOString().split('T')[0]}`);
+      return cachedZones;
+    }
+
+    // Fetch candles (10 days/weeks/months before target date)
+    const period1 = new Date(target);
+    switch (timeFrame) {
+      case '1d':
+        period1.setDate(target.getDate() - 10); // 10 calendar days
+        break;
+      case '1wk':
+        period1.setDate(target.getDate() - 8 * 7); // ~10 weeks
+        break;
+      case '1mo':
+        period1.setMonth(target.getMonth() - 8); // ~8 months
+        break;
+    }
+    const period2 = new Date(target.getTime() + 24 * 60 * 60 * 1000); // Include target date
+
+    const allZones = [];
+
+    // Process tickers in batches to avoid overwhelming API
+    const batchSize = 5;
+    for (let i = 0; i < tickers.length; i += batchSize) {
+      const batch = tickers.slice(i, i + batchSize);
+      const promises = batch.map(async ticker => {
+        try {
+          
+    const period2 = new Date(target);
+    console.log(period2, new Date());
+    const period1 = new Date(period2);
+    period1.setFullYear(period2.getFullYear() - 1); // 1 year ago
+
+    // Fetch historical data
+    const candles = await retry(() =>
+      yahooFinance.historical(ticker, {
+        period1,
+        period2,
+        interval: timeFrame,
+      })
+    );
+          console.log(candles);
+          if (!candles || candles.length < 6) {
+            logger.warn(`Insufficient data for ${ticker} (${timeFrame}): ${candles ? candles.length : 0} candles`);
+            return [];
+          }
+
+          const zones = [];
+          // Process the latest 6 candles
+          const recentCandles = candles.slice(-6);
+
+          for (let j = recentCandles.length - 1; j >= 2; j--) {
+            const currentCandle = recentCandles[j];
+            logger.info(`Processing candle for ${ticker} on ${currentCandle.date}`);
+
+            // Check leg-out condition
+            const isLegOutGreen = currentCandle.close > currentCandle.open;
+            const priorHigh = Math.max(...recentCandles.slice(Math.max(j - 3, 0), j).map(c => c.high));
+            const range = currentCandle.high - currentCandle.low;
+            const bodyPct = Math.abs(currentCandle.close - currentCandle.open) / range * 100;
+            const isLegOutValid = isLegOutGreen && currentCandle.close > priorHigh && bodyPct > 50;
+
+            logger.info(`🟢 Checking Leg-Out for ${ticker} on ${currentCandle.date}: Close=${currentCandle.close}, Open=${currentCandle.open}, PriorHigh=${priorHigh}, isGreen=${isLegOutGreen}, isValid=${isLegOutValid}`);
+
+            if (isLegOutValid) {
+              const legOut = currentCandle;
+              let baseCandles = [];
+              let baseCount = 0;
+              let k = j - 1;
+
+              while (k >= 0 && baseCount < 5) {
+                const prevCandle = recentCandles[k];
+                const body = Math.abs(prevCandle.close - prevCandle.open);
+                const range = prevCandle.high - prevCandle.low;
+                const isBaseCandle = range > 0 && body / range < 0.5;
+
+                logger.info(`🔹${ticker} Base check at ${prevCandle.date}: Range=${range}, Body=${body}, Ratio=${(body / range).toFixed(2)}, isBase=${isBaseCandle}`);
+
+                if (isBaseCandle) {
+                  baseCandles.push(prevCandle);
+                  baseCount++;
+                  k--;
+                } else {
+                  logger.info(`⛔️ ${ticker} Base sequence broke at ${prevCandle.date}`);
+                  break;
+                }
+              }
+
+              // Check leg-in
+              if (baseCount >= 1 && k >= 0) {
+                const legIn = recentCandles[k];
+                const body = Math.abs(legIn.close - legIn.open);
+                const range = legIn.high - legIn.low;
+                const isLegIn = range > 0 && body / range > 0.5;
+
+                const isDBR = legIn.close < legIn.open;
+                const isRBR = legIn.close > legIn.open;
+
+                logger.info(`🔻 Leg-In check at ${legIn.date}: Range=${range}, Body=${body}, Ratio=${(body / range).toFixed(2)}, isLegIn=${isLegIn}, DBR=${isDBR}, RBR=${isRBR}`);
+
+                if (isLegIn && (isDBR || isRBR)) {
+                  const proximalLine = Math.max(...baseCandles.map(c => Math.max(c.close, c.open)));
+                  const distalLine = Math.min(...baseCandles.map(c => c.low));
+
+                  const freshness = await getFreshness(ticker, timeFrame, proximalLine, distalLine, legOut.date);
+                  const strength = (legOut.high - legOut.low) > (baseCandles[baseCandles.length - 1].high - baseCandles[baseCandles.length - 1].low) * 2 ? 2 : 1;
+                  const timeAtBase = baseCount <= 3 ? 2 : baseCount <= 5 ? 1 : 0;
+                  const tradeScore = freshness + strength + timeAtBase;
+
+                  logger.info(`📊 Zone Candidate for ${ticker} on ${legOut.date} | Proximal=${proximalLine}, Distal=${distalLine}, Freshness=${freshness}, Strength=${strength}, TimeAtBase=${timeAtBase}, TradeScore=${tradeScore}`);
+
+                  if (tradeScore >= 4) {
+                    const zone = {
+                      ticker,
+                      timeFrame,
+                      type: 'demand',
+                      pattern: isDBR ? 'DBR' : 'RBR',
+                      proximalLine,
+                      distalLine,
+                      tradeScore,
+                      freshness: freshness,
+                      strength: strength,
+                      timeAtBase: timeAtBase,
+                      legOutDate: new Date(legOut.date),
+                    };
+                    zones.push(zone);
+                    logger.info(`✅ Zone ACCEPTED for ${ticker} on ${legOut.date}`);
+                  } else {
+                    logger.info(`❌ Zone REJECTED for ${ticker} on ${legOut.date} | Insufficient tradeScore: ${tradeScore}`);
+                  }
+                }
+              }
+            }
+          }
+
+          return zones;
+        } catch (err) {
+          logger.error(`Error processing ${ticker} (${timeFrame}): ${err.message}`);
+          return [];
+        }
+      });
+
+      const results = await Promise.allSettled(promises);
+      const batchZones = results
+        .filter(result => result.status === 'fulfilled')
+        .map(result => result.value)
+        .flat();
+      allZones.push(...batchZones);
+
+      // Delay between batches to avoid rate limits
+      if (i + batchSize < tickers.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    // Save zones to MongoDB
+    if (allZones.length > 0) {
+      try {
+        await Zone.insertMany(allZones, { ordered: false });
+        logger.info(`Inserted ${allZones.length} zones`);
+      } catch (err) {
+        if (err.code === 11000) {
+          logger.warn('Duplicate zone(s) skipped during insert.');
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    return allZones;
+  } catch (err) {
+    logger.error(`Error identifying demand zones: ${err.message}`);
+    throw err;
+  }
+};
 
 
-module.exports = { identifyDemandZones,identifyDailyDemandZones };
+module.exports = { identifyDemandZones, identifyDailyDemandZones, detectZones };

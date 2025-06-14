@@ -34,3 +34,13 @@ export const getDailyDemandZones = async (targetDate) => {
   );
   return response.data;
 };
+
+//detect zones (requires auth)
+export const detectZones = async (timeFrame) => {
+  const response = await axios.post(
+    `${API_URL}/zones/detect`,
+    { timeFrame },
+    { headers: getAuthHeaders() }
+  );
+  return response.data;
+};

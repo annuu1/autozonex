@@ -935,7 +935,6 @@ const detectZones = async (timeFrame = '1wk', tickers = NSE_TICKERS, targetDate 
         try {
           
     const period2 = new Date(target);
-    console.log(period2, new Date());
     const period1 = new Date(period2);
     period1.setFullYear(period2.getFullYear() - 1); // 1 year ago
 
@@ -947,7 +946,6 @@ const detectZones = async (timeFrame = '1wk', tickers = NSE_TICKERS, targetDate 
         interval: timeFrame,
       })
     );
-          console.log(candles);
           if (!candles || candles.length < 6) {
             logger.warn(`Insufficient data for ${ticker} (${timeFrame}): ${candles ? candles.length : 0} candles`);
             return [];

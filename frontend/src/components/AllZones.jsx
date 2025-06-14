@@ -3,7 +3,7 @@ import { fetchAllZones } from '../services/api';
 import StockChart from './StockChart';
 import { formatDate } from '../utils/formatDate';
 import { formatNumber } from '../utils/formatNumber';
-import { getDailyDemandZones } from '../api/zone';
+import { detectZones, getDailyDemandZones } from '../api/zone';
 
 const AllZones = () => {
   const chartLayouts = ['default', 'allTimeframes'];
@@ -18,6 +18,8 @@ const AllZones = () => {
   const [selectedZone, setSelectedZone] = useState(null);
 
   const [targetDate, setTargetDate] = useState('');
+  const [timeFrame, setTimeFrame] = useState('1d'); // New state for time frame selection
+  const [showFetchForm, setShowFetchForm] = useState(false); // Control fetch form visibility
 
 
   // Pagination states
@@ -73,18 +75,30 @@ const AllZones = () => {
       alert('Please select a target date');
       return;
     }
-  
     try {
       setLoading(true);
       setError(null);
-      const data = await getDailyDemandZones(targetDate);
-      console.log('Fetched daily demand zones:', data);
+      // add and check for the supported time frames
+      if (!['1d', '1wk', '1mo'].includes(timeFrame)) {
+        alert('Currently only 1d, 1wk, and 1mo time frames are supported.');
+        setLoading(false);
+        return;
+      }
+      let data;
+      if (timeFrame === '1d') {
+        data = await getDailyDemandZones(targetDate);
+      } else {
+        data = await detectZones(timeFrame, targetDate);
+        setLoading(false);
+        return;
+      }
+      console.log('Fetched demand zones:', data);
       setZones(data);
       setPage(1);
       setTotalPages(1);
     } catch (err) {
-      console.error('Error fetching daily demand zones:', err);
-      setError(err.message || 'Failed to load daily demand zones');
+      console.error('Error fetching demand zones:', err);
+      setError(err.message || 'Failed to load demand zones');
     } finally {
       setLoading(false);
     }
@@ -132,18 +146,49 @@ const AllZones = () => {
         </button>
         <h2 className="text-xl font-semibold mb-4">Zones</h2>
         <div className="mb-4 flex gap-2">
-          <input
-            type="date"
-            value={targetDate}
-            onChange={(e) => setTargetDate(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
-          <button
-            onClick={handleFetchDemandZones}
-            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-          >
-            Fetch
-          </button>
+          {showFetchForm ? (
+            <div className="flex flex-col gap-2 bg-gray-100 p-2 rounded shadow">
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={targetDate}
+                  onChange={(e) => setTargetDate(e.target.value)}
+                  className="border p-2 rounded w-full"
+                />
+                <select
+                  value={timeFrame}
+                  onChange={e => setTimeFrame(e.target.value)}
+                  className="border p-2 rounded"
+                  style={{ minWidth: '70px' }}
+                  title="Select time frame"
+                >
+                  <option value="1d">1d</option>
+                  <option value="1wk">1wk</option>
+                  <option value="1mo">1mo</option>
+                </select>
+                <button
+                  onClick={handleFetchDemandZones}
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                >
+                  Fetch
+                </button>
+                <button
+                  onClick={() => setShowFetchForm(false)}
+                  className="px-2 py-2 bg-red-400 text-white rounded hover:bg-red-500"
+                  title="Close form"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowFetchForm(true)}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+            >
+              Show Fetch Form
+            </button>
+          )}
         </div>
         {loading && (
           <div className="flex justify-center my-4">
@@ -204,7 +249,7 @@ const AllZones = () => {
               {chartLayouts[currentChartLayoutIndex] === 'default' && (
                 <>
                   <div>
-                    <StockChart ticker={selectedZone.ticker} timeFrame={selectedZone.timeFrame} selectedZone={selectedZone} />
+                    <StockChart ticker={selectedZone.ticker} timeFrame={"1d"} selectedZone={selectedZone} />
                   </div>
                   <div className="flex gap-4">
                     <StockChart ticker={selectedZone.ticker} timeFrame={"1wk"} selectedZone={selectedZone} />

@@ -1,10 +1,10 @@
 import axios from "axios";
-const GSHEETS_API =  import.meta.env.VITE_GSHEETS_API || "https://script.google.com/macros/s/AKfycbyJYgFC4RcSbn86wirSof-FcJ4pc69BF4QtgT8-FSThA6AMToQiBG1kuFYxkLJCB5Ef/exec";
+const GSHEETS_API =  import.meta.env.VITE_GSHEETS_API || "https://script.google.com/macros/s/AKfycbwX0A8lOu8LwQ8ii1hxIRvLd1PJbI8LhUpBcUnOpepYP4LcIlsFjE0xRIn9yLf5a1gH/exec";
 
 // CRUD functions for alert management via GSHEETS_API
 
 // Create a new alert
-export async function createAlert({ ticker, alertPrice, condition, userEmail, telegramChatId }) {
+export async function createAlert({ ticker, alertPrice, condition, userEmail, telegramChatId, note }) {
   const params = new URLSearchParams({
     method: "create",
     ticker,
@@ -12,6 +12,7 @@ export async function createAlert({ ticker, alertPrice, condition, userEmail, te
     condition,
     userEmail,
     telegramChatId,
+    note
   });
   const url = `${GSHEETS_API}?${params.toString()}`;
   const response = await axios.get(url);
@@ -34,7 +35,7 @@ export async function getAlertById(id) {
 }
 
 // Update an alert
-export async function updateAlert({ id, alertPrice, userEmail, ticker, condition, telegramChatId }) {
+export async function updateAlert({ id, alertPrice, userEmail, ticker, condition, telegramChatId, note }) {
   // Only send fields that are provided
   const params = new URLSearchParams({ method: "update", id });
   if (alertPrice !== undefined) params.append("alertPrice", alertPrice);
@@ -42,6 +43,7 @@ export async function updateAlert({ id, alertPrice, userEmail, ticker, condition
   if (ticker !== undefined) params.append("ticker", ticker);
   if (condition !== undefined) params.append("condition", condition);
   if (telegramChatId !== undefined) params.append("telegramChatId", telegramChatId);
+  if (note !== undefined) params.append("note", note);
 
   const url = `${GSHEETS_API}?${params.toString()}`;
   const response = await axios.get(url);

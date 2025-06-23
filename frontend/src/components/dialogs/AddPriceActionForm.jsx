@@ -70,7 +70,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
   useEffect(() => {
     setFormData(prev => ({
       ...prev,
-      source_timeframes: timeframeFields.map((field, index) => ({
+      source_timeframes: timeframeFields?.map((field, index) => ({
         _id: prev.source_timeframes[index]?._id || '',
         ...field
       }))
@@ -193,7 +193,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
           disabled={!!priceAction}
         />
         <datalist id="symbol-suggestions">
-          {symbolOptions.map((sym) => (
+          {symbolOptions?.map((sym) => (
             <option key={sym._id} value={sym.symbol} />
           ))}
         </datalist>
@@ -307,7 +307,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Key Levels Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Key Levels</h3>
-        {formData.key_levels.map((level, idx) => (
+        {formData.key_levels?.map((level, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <div>
               <label className="block text-xs">Level Type</label>
@@ -360,7 +360,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Participants Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Participants</h3>
-        {formData.participants && formData.participants.map((p, idx) => (
+        {formData.participants && formData.participants?.map((p, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <div>
               <label className="block text-xs">User ID</label>
@@ -396,7 +396,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Trade Setups Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Trade Setups</h3>
-        {formData.trade_setups.map((setup, idx) => (
+        {formData.trade_setups?.map((setup, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <input
               value={setup}
@@ -429,7 +429,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Positives Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Positives</h3>
-        {formData.positives.map((pos, idx) => (
+        {formData.positives?.map((pos, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <input
               value={pos}
@@ -462,7 +462,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Negatives Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Negatives</h3>
-        {formData.negatives.map((neg, idx) => (
+        {formData.negatives?.map((neg, idx) => (
           <div key={idx} className="flex gap-2 items-end mb-2">
             <input
               value={neg}

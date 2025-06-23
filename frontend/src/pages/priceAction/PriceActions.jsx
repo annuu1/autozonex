@@ -178,7 +178,7 @@ const PriceActions = () => {
   return (
     <>
       <div className="flex justify-between items-center p-4 bg-white border-b">
-        <h1 className="text-2xl font-semibold">Price Action Logs</h1>
+        <h1 className="text-2xl font-semibold">Price Action Logs ({items.length})</h1>
         <button
           type="button"
           onClick={() => setSelected(null)}

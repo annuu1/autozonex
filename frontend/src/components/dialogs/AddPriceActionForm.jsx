@@ -228,7 +228,7 @@ const AddPriceActionForm = ({ onSubmit, onCancel, priceAction }) => {
       {/* Source Timeframes Section */}
       <div className="border rounded-lg p-4 mb-4">
         <h3 className="text-lg font-semibold mb-3">Source Timeframes</h3>
-        {timeframeFields.map((field, index) => (
+        {timeframeFields?.map((field, index) => (
           <div key={index} className="border-b last:border-0 pb-4 mb-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium">Timeframe {index + 1}</span>

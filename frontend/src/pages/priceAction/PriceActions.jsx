@@ -157,12 +157,12 @@ const PriceActions = () => {
         </div>
         <div className="w-1/2">
           <p className="text-gray-600"><b>Source Timeframes : 
-            </b>{item.source_timeframes?.map(tf => tf.timeframe + `(${tf.zone_type})`)
+            </b>{(item.source_timeframes || []).map(tf => tf.timeframe + `(${tf.zone_type})`)
             .join(` , `) || 'N/A'}</p>
         </div>
         <div className="w-1/2">
           <p className="text-gray-600"><b>Key Levels : 
-            </b>{item.key_levels?.map(tf => tf.level_type + `(${tf.price})`)
+            </b>{(item.key_levels || []).map(tf => tf.level_type + `(${tf.price})`)
             .join(` , `) || 'N/A'}</p>
         </div>
       </div>

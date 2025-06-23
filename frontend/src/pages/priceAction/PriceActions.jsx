@@ -67,8 +67,9 @@ const PriceActions = () => {
       notes: pa.notes,
       last_seen: pa.last_seen,
     }));
-    setItems(pa);
-    setSelected(null);
+    setItems(res);
+    //set the selected item to the item whichi is updated and if created then set last item 
+    setSelected(res?.length > 0 ? (data._id ? res.find((i) => i._id === data._id) : res[res.length - 1]) : null);
   };
 
   const handleLastSeenUpdate = async (itemId, revert = false) => {

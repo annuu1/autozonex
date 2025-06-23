@@ -10,6 +10,7 @@ const PriceActionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Symbol",
     required: true,
+    unique:true,
   },
   follows_demand_supply: {
     type: Boolean,

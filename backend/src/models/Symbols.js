@@ -13,6 +13,10 @@ const SymbolSchema = new mongoose.Schema({
     required: false,
     trim: true
   },
+  ltp:{
+    type: Number,
+    required: false
+  },
   exchange: {
     type: String,
     required: false,

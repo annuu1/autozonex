@@ -17,6 +17,10 @@ const SymbolSchema = new mongoose.Schema({
     type: Number,
     required: false
   },
+  isLiquid:{
+    type: Boolean,
+    default: true,
+  },
   exchange: {
     type: String,
     required: false,

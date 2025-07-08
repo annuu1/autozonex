@@ -11,6 +11,7 @@ const TELEGRAM_CHANNELS = [
   { id: "-1002187821708", name: "Premium Chats" },
   { id: "-1002384605356", name: "Equity" },
   { id: "-1002269659948", name: "Algo Pulse" },
+  { id: "671330725", name: "Nirmal" },
 ];
 
 // Tracker channel (not shown in UI, always receives all messages)

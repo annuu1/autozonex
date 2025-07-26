@@ -22,6 +22,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Chip,
+  Badge,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -32,6 +34,7 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import { createAlert, getAlerts } from '../../api/alert';
 import { useAuth } from '../../hooks/useAuth';
 import { useSettings } from '../../hooks/useSettings';
+import { styled } from '@mui/material/styles';
 
 // API functions
 import {
@@ -42,6 +45,21 @@ import {
   deleteWatchList,
   updateWatchList,
 } from '../../api/watchList';
+
+const StyledListItem = styled(ListItem)(({ theme, status }) => ({
+  transition: 'all 0.3s ease-in-out',
+  borderLeft: `4px solid ${
+    status === 'Not Sent' ? theme.palette.warning.main : theme.palette.success.main
+  }`,
+  backgroundColor: theme.palette.background.paper,
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[4],
+    backgroundColor: theme.palette.grey[50],
+  },
+  marginBottom: theme.spacing(1.5),
+  borderRadius: theme.shape.borderRadius,
+}));
 
 const WatchListLayout = () => {
   const [watchLists, setWatchLists] = useState([]);
@@ -65,8 +83,16 @@ const WatchListLayout = () => {
   const [alertCondition, setAlertCondition] = useState('Above');
   const [alertPrice, setAlertPrice] = useState('');
   const [alertNote, setAlertNote] = useState('');
+  const [viewAlertsDialogOpen, setViewAlertsDialogOpen] = useState(false);
+  const [alerts, setAlerts] = useState([]);
+  const [alertTabValue, setAlertTabValue] = useState(0);
   const { user } = useAuth();
   const { settings } = useSettings();
+
+  // Define selectedWatchList, symbols, and selectedSymbol early
+  const selectedWatchList = watchLists[selectedWatchListIdx] || {};
+  const symbols = selectedWatchList.symbols || [];
+  const selectedSymbol = symbols[selectedSymbolIdx] || null;
 
   // Fetch watchlists
   const fetchWatchLists = async () => {
@@ -78,9 +104,27 @@ const WatchListLayout = () => {
     }
   };
 
+  // Fetch alerts for selected symbol
+  const fetchAlerts = async () => {
+    if (!selectedSymbol || !user) return;
+    try {
+      const response = await getAlerts(user.email);
+      const symbolAlerts = response.data.alerts.filter(
+        (alert) => alert.ticker.toUpperCase() === selectedSymbol.toUpperCase()
+      );
+      setAlerts(symbolAlerts);
+    } catch (err) {
+      setAlerts([]);
+    }
+  };
+
   useEffect(() => {
     fetchWatchLists();
   }, []);
+
+  useEffect(() => {
+    fetchAlerts();
+  }, [selectedSymbol, user]);
 
   // Reset symbol selection when watchlist changes
   useEffect(() => {
@@ -139,7 +183,6 @@ const WatchListLayout = () => {
     setSymbolAddError('');
     const symbol = symbolInput.trim().toUpperCase();
     if (!symbol) return;
-    const selectedWatchList = watchLists[selectedWatchListIdx];
     if (selectedWatchList.symbols.includes(symbol)) {
       setSymbolAddError('Symbol already exists in this watchlist.');
       return;
@@ -181,6 +224,7 @@ const WatchListLayout = () => {
       });
       if (alert.success) {
         setAddAlertDialogOpen(false);
+        fetchAlerts(); // Refresh alerts after adding
       } else {
         window.alert(alert.message);
       }
@@ -189,9 +233,11 @@ const WatchListLayout = () => {
     }
   };
 
-  const selectedWatchList = watchLists[selectedWatchListIdx] || {};
-  const symbols = selectedWatchList.symbols || [];
-  const selectedSymbol = symbols[selectedSymbolIdx] || null;
+  // View Alerts
+  const handleViewAlerts = () => {
+    setAlertTabValue(0);
+    setViewAlertsDialogOpen(true);
+  };
 
   // Toggle fullscreen
   const toggleFullscreen = () => {
@@ -214,6 +260,19 @@ const WatchListLayout = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [chartLayouts.length]);
+
+  const unsentAlertsCount = alerts.filter(
+    (alert) => alert.triggerNotificationStatus === 'Not Sent'
+  ).length;
+
+  const sentAlerts = alerts.filter((alert) => alert.triggerNotificationStatus !== 'Not Sent');
+  const unsentAlerts = alerts.filter((alert) => alert.triggerNotificationStatus === 'Not Sent');
+
+  const calculatePercentDiff = (alertPrice, dayLow) => {
+    if (!dayLow || !alertPrice) return null;
+    const diff = ((dayLow - alertPrice) / alertPrice) * 100;
+    return diff.toFixed(2);
+  };
 
   return (
     <Box className="flex flex-col h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
@@ -393,12 +452,43 @@ const WatchListLayout = () => {
                       borderRadius: 20,
                       padding: '0px 16px',
                       minWidth: 'auto',
-                      lineHeight: 1.2
+                      lineHeight: 1.2,
                     }}
                     disabled={!selectedSymbol}
                   >
                     Add Alert
                   </Button>
+                  <Badge
+                    badgeContent={unsentAlertsCount}
+                    color="warning"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        top: -8,
+                        right: -8,
+                        fontSize: '0.65rem',
+                        height: 16,
+                        minWidth: 16,
+                        padding: '0 4px',
+                      },
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      startIcon={<NotificationsActiveIcon sx={{ fontSize: 12 }} />}
+                      onClick={handleViewAlerts}
+                      size="small"
+                      sx={{
+                        textTransform: 'none',
+                        borderRadius: 20,
+                        padding: '0px 16px',
+                        minWidth: 'auto',
+                        lineHeight: 1.2,
+                      }}
+                      disabled={!selectedSymbol}
+                    >
+                      View Alerts
+                    </Button>
+                  </Badge>
                   <IconButton onClick={toggleFullscreen}>
                     {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
                   </IconButton>
@@ -499,11 +589,11 @@ const WatchListLayout = () => {
       {/* Add Alert Dialog */}
       <Dialog open={addAlertDialogOpen} onClose={() => setAddAlertDialogOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
-          Add New Alert
+          Add Alert
         </DialogTitle>
-        <DialogContent className="flex flex-col gap-4 pt-4">
+        <DialogContent className="flex flex-col gap-3 pt-6">
           <TextField
-            label="Ticker"
+            label="Stock"
             value={alertTicker}
             onChange={(e) => setAlertTicker(e.target.value.toUpperCase())}
             fullWidth
@@ -536,7 +626,7 @@ const WatchListLayout = () => {
             onChange={(e) => setAlertNote(e.target.value)}
             fullWidth
             multiline
-            minRows={2}
+            rows={2}
             variant="outlined"
           />
         </DialogContent>
@@ -554,6 +644,88 @@ const WatchListLayout = () => {
             sx={{ textTransform: 'none', borderRadius: 20 }}
           >
             Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Alerts Dialog */}
+      <Dialog open={viewAlertsDialogOpen} onClose={() => setViewAlertsDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
+          Alerts for {selectedSymbol}
+        </DialogTitle>
+        <DialogContent className="pt-4">
+          <Tabs
+            value={alertTabValue}
+            onChange={(e, newValue) => setAlertTabValue(newValue)}
+            sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+          >
+            <Tab label="Unsent" sx={{ textTransform: 'none', fontWeight: 600 }} />
+            <Tab label="Sent" sx={{ textTransform: 'none', fontWeight: 600 }} />
+          </Tabs>
+          <List sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {(alertTabValue === 0 ? unsentAlerts : sentAlerts).length === 0 ? (
+              <Typography className="text-center text-gray-500 py-8">
+                No {alertTabValue === 0 ? 'unsent' : 'sent'} alerts for {selectedSymbol}.
+              </Typography>
+            ) : (
+              (alertTabValue === 0 ? unsentAlerts : sentAlerts).map((alert) => (
+                <StyledListItem
+                  key={alert.id}
+                  status={alert.triggerNotificationStatus}
+                >
+                  <ListItemText
+                    primary={
+                      <Box className="flex items-center gap-2">
+                        <Typography variant="subtitle1" className="font-semibold">
+                          {alert.ticker}
+                        </Typography>
+                        <Chip
+                          label={alert.condition}
+                          size="small"
+                          color={alert.condition === 'Above' ? 'success' : 'error'}
+                          sx={{ fontWeight: 500 }}
+                        />
+                        <Typography variant="subtitle1" className="font-semibold">
+                          {alert.alertPrice}
+                        </Typography>
+                        {alert.dayLow && (
+                          <Typography variant="body2" color="textSecondary">
+                            Day Low: {alert.dayLow}
+                          </Typography>
+                        )}
+                        {alert.dayLow && calculatePercentDiff(alert.alertPrice, alert.dayLow) && (
+                          <Chip
+                            label={`${calculatePercentDiff(alert.alertPrice, alert.dayLow)}%`}
+                            size="small"
+                            color={
+                              Math.abs(calculatePercentDiff(alert.alertPrice, alert.dayLow)) < 5
+                                ? 'warning'
+                                : 'default'
+                            }
+                            sx={{ fontWeight: 500 }}
+                          />
+                        )}
+                      </Box>
+                    }
+                    secondary={
+                      alert.note && (
+                        <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5 }}>
+                          {alert.note}
+                        </Typography>
+                      )
+                    }
+                  />
+                </StyledListItem>
+              ))
+            )}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setViewAlertsDialogOpen(false)}
+            sx={{ textTransform: 'none' }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

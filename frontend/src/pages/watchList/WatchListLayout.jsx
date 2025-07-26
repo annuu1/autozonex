@@ -189,6 +189,17 @@ const WatchListLayout = () => {
 
   const unsentAlertsCount = unsentAlerts.length;
 
+  // Memoize filtered symbols based on search input
+  const filteredSymbols = useMemo(
+    () =>
+      symbolInput.trim()
+        ? symbols.filter((symbol) =>
+            symbol.toLowerCase().includes(symbolInput.toLowerCase().trim())
+          )
+        : symbols,
+    [symbols, symbolInput]
+  );
+
   // Fetch watchlists
   const fetchWatchLists = async () => {
     try {
@@ -225,18 +236,25 @@ const WatchListLayout = () => {
     fetchAlerts();
   }, [selectedSymbol, user]);
 
-  // Reset symbol selection when watchlist changes
+  // Reset symbol selection when watchlist changes or filter changes
   useEffect(() => {
-    setSelectedSymbolIdx(0);
-  }, [selectedWatchListIdx]);
+    // Ensure selectedSymbolIdx is valid for filteredSymbols
+    if (filteredSymbols.length > 0 && selectedSymbolIdx >= filteredSymbols.length) {
+      setSelectedSymbolIdx(0);
+    } else if (filteredSymbols.length === 0) {
+      setSelectedSymbolIdx(-1); // No valid selection when filtered list is empty
+    }
+  }, [filteredSymbols, selectedSymbolIdx]);
 
   const handleTabChange = (event, newValue) => {
     setSelectedWatchListIdx(newValue);
+    setSymbolInput(''); // Clear search input on tab change
     setErrorMessage(''); // Clear error on tab change
   };
 
   const handleSymbolSelect = (idx) => {
     setSelectedSymbolIdx(idx);
+    setSymbolInput(''); // Clear search input on symbol select
     setErrorMessage(''); // Clear error on symbol select
   };
 
@@ -306,7 +324,7 @@ const WatchListLayout = () => {
         selectedWatchList._id || selectedWatchList.id,
         symbol
       );
-      setSymbolInput('');
+      setSymbolInput(''); // Clear input to reset filter
       setErrorMessage('');
       fetchWatchLists();
     } catch (err) {
@@ -470,7 +488,7 @@ const WatchListLayout = () => {
               >
                 <TextField
                   size="small"
-                  label="Add Symbol"
+                  label="Search or Add Symbol"
                   value={symbolInput}
                   onChange={(e) => setSymbolInput(e.target.value)}
                   variant="outlined"
@@ -489,57 +507,67 @@ const WatchListLayout = () => {
           )}
           <Box sx={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
             <List disablePadding>
-              {symbols.length > 0 ? (
-                symbols.map((symbol, idx) => (
-                  <ListItem
-                    key={symbol}
-                    disablePadding
-                    className="!block"
-                    secondaryAction={
-                      <IconButton
-                        edge="end"
-                        onClick={async () => {
-                          try {
-                            await removeSymbolFromWatchList(
-                              selectedWatchList._id || selectedWatchList.id,
-                              symbol
-                            );
-                            setErrorMessage('');
-                            fetchWatchLists();
-                          } catch (err) {
-                            console.error('Failed to remove symbol:', err);
-                            setSymbolAddError('Failed to remove symbol. Please try again.');
-                          }
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    }
-                  >
-                    <ListItemButton
-                      selected={idx === selectedSymbolIdx}
-                      onClick={() => handleSymbolSelect(idx)}
-                      className={`!rounded-none !pl-6 !pr-4 !py-2
-                ${
-                  idx === selectedSymbolIdx
-                    ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
-                    : 'border-l-4 border-transparent'
-                }
-              `}
+              {filteredSymbols.length > 0 ? (
+                filteredSymbols.map((symbol, idx) => {
+                  // Map filtered index to original symbols index
+                  const originalIdx = symbols.indexOf(symbol);
+                  return (
+                    <ListItem
+                      key={symbol}
+                      disablePadding
+                      className="!block"
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          onClick={async () => {
+                            try {
+                              await removeSymbolFromWatchList(
+                                selectedWatchList._id || selectedWatchList.id,
+                                symbol
+                              );
+                              setErrorMessage('');
+                              fetchWatchLists();
+                            } catch (err) {
+                              console.error('Failed to remove symbol:', err);
+                              setSymbolAddError('Failed to remove symbol. Please try again.');
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      }
                     >
-                      <ListItemText
-                        primary={symbol}
-                        primaryTypographyProps={{
-                          className:
-                            idx === selectedSymbolIdx ? 'font-semibold' : '',
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                ))
+                      <ListItemButton
+                        selected={originalIdx === selectedSymbolIdx}
+                        onClick={() => handleSymbolSelect(originalIdx)}
+                        className={`!rounded-none !pl-6 !pr-4 !py-2
+                          ${
+                            originalIdx === selectedSymbolIdx
+                              ? 'bg-blue-100 font-semibold text-blue-900 border-l-4 border-blue-600'
+                              : 'border-l-4 border-transparent'
+                          }
+                        `}
+                      >
+                        <ListItemText
+                          primary={symbol}
+                          primaryTypographyProps={{
+                            className:
+                              originalIdx === selectedSymbolIdx ? 'font-semibold' : '',
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  );
+                })
               ) : (
                 <ListItem className="!pl-6 !py-4 text-gray-400">
-                  <ListItemText primary="No symbols" />
+                  <ListItemText
+                    primary={
+                      symbolInput.trim()
+                        ? 'No matching symbols'
+                        : 'No symbols'
+                    }
+                  />
                 </ListItem>
               )}
             </List>
@@ -557,9 +585,13 @@ const WatchListLayout = () => {
               }`}
             >
               <Box className="flex justify-between items-center mb-4">
-                <Typography variant="h5">{selectedSymbol} ({
-                  chartLayouts[currentChartLayoutIndex] === 'allTimeframes' ? '60m, 5m, 15m' : '1d, 1wk, 1mo'
-                })</Typography>
+                <Typography variant="h5">
+                  {selectedSymbol} (
+                  {chartLayouts[currentChartLayoutIndex] === 'allTimeframes'
+                    ? '60m, 5m, 15m'
+                    : '1d, 1wk, 1mo'}
+                  )
+                </Typography>
                 <Box className="flex gap-2">
                   <Button
                     variant="contained"
@@ -705,7 +737,7 @@ const WatchListLayout = () => {
         </DialogActions>
       </Dialog>
 
-      Te  {/* View Alerts Dialog */}
+      {/* View Alerts Dialog */}
       <Dialog open={viewAlertsDialogOpen} onClose={() => setViewAlertsDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
           Alerts for {selectedSymbol}

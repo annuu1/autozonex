@@ -113,7 +113,7 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null, alerts = []
               lineWidth: 1,
               lineStyle: 0, // Dashed line to differentiate from zones
               axisLabelVisible: true,
-              title: `${alert.condition} ${alert.alertPrice}`,
+              title: `Alert-${index+1}`,
             });
             priceLinesRef.current.push(priceLine);
           });

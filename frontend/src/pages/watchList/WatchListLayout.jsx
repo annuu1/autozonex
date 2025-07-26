@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, memo } from 'react';
 import StockChart from '../../components/StockChart';
 import {
   Box,
@@ -61,6 +61,92 @@ const StyledListItem = styled(ListItem)(({ theme, status }) => ({
   borderRadius: theme.shape.borderRadius,
 }));
 
+// Separate AddAlertDialog component to isolate state
+const AddAlertDialog = ({ open, onClose, onSubmit, initialTicker }) => {
+  const [alertTicker, setAlertTicker] = useState(initialTicker || '');
+  const [alertCondition, setAlertCondition] = useState('Above');
+  const [alertPrice, setAlertPrice] = useState('');
+  const [alertNote, setAlertNote] = useState('');
+  const { settings } = useSettings();
+
+  const handleSubmit = () => {
+    if (!settings) {
+      window.alert('To get alerts on Telegram, you should set your Telegram chat ID in settings');
+      return;
+    }
+    onSubmit({
+      ticker: alertTicker,
+      condition: alertCondition,
+      alertPrice: parseFloat(alertPrice),
+      note: alertNote,
+      telegramChatId: settings.telegramChatId,
+    });
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
+        Add Alert
+      </DialogTitle>
+      <DialogContent className="flex flex-col gap-3 pt-6">
+        <TextField
+          label="Stock"
+          value={alertTicker}
+          onChange={(e) => setAlertTicker(e.target.value.toUpperCase())}
+          fullWidth
+          autoFocus
+          variant="outlined"
+        />
+        <FormControl fullWidth>
+          <InputLabel>Condition</InputLabel>
+          <Select
+            value={alertCondition}
+            label="Condition"
+            onChange={(e) => setAlertCondition(e.target.value)}
+            variant="outlined"
+          >
+            <MenuItem value="Above">Above</MenuItem>
+            <MenuItem value="Below">Below</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField
+          label="Alert Price"
+          type="number"
+          value={alertPrice}
+          onChange={(e) => setAlertPrice(e.target.value)}
+          fullWidth
+          variant="outlined"
+        />
+        <TextField
+          label="Note"
+          value={alertNote}
+          onChange={(e) => setAlertNote(e.target.value)}
+          fullWidth
+          multiline
+          rows={2}
+          variant="outlined"
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button
+          onClick={onClose}
+          sx={{ textTransform: 'none' }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={!alertTicker || !alertPrice}
+          sx={{ textTransform: 'none', borderRadius: 20 }}
+        >
+          Add
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
 const WatchListLayout = () => {
   const [watchLists, setWatchLists] = useState([]);
   const [selectedWatchListIdx, setSelectedWatchListIdx] = useState(0);
@@ -79,21 +165,29 @@ const WatchListLayout = () => {
   const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
   const fullscreenRef = useRef(null);
   const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
-  const [alertTicker, setAlertTicker] = useState('');
-  const [alertCondition, setAlertCondition] = useState('Above');
-  const [alertPrice, setAlertPrice] = useState('');
-  const [alertNote, setAlertNote] = useState('');
   const [viewAlertsDialogOpen, setViewAlertsDialogOpen] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [alertTabValue, setAlertTabValue] = useState(0);
   const [errorMessage, setErrorMessage] = useState('');
   const { user } = useAuth();
-  const { settings } = useSettings();
 
   // Define selectedWatchList, symbols, and selectedSymbol early
   const selectedWatchList = watchLists[selectedWatchListIdx] || {};
   const symbols = selectedWatchList.symbols || [];
   const selectedSymbol = symbols[selectedSymbolIdx] || null;
+
+  // Memoize unsentAlerts to prevent new reference on every render
+  const unsentAlerts = useMemo(
+    () => alerts.filter((alert) => alert.triggerNotificationStatus === 'Not Sent'),
+    [alerts]
+  );
+
+  const sentAlerts = useMemo(
+    () => alerts.filter((alert) => alert.triggerNotificationStatus !== 'Not Sent'),
+    [alerts]
+  );
+
+  const unsentAlertsCount = unsentAlerts.length;
 
   // Fetch watchlists
   const fetchWatchLists = async () => {
@@ -223,27 +317,15 @@ const WatchListLayout = () => {
 
   // Add Alert
   const handleAddAlert = () => {
-    setAlertTicker(selectedSymbol || '');
-    setAlertCondition('Above');
-    setAlertPrice('');
-    setAlertNote('');
     setAddAlertDialogOpen(true);
     setErrorMessage('');
   };
 
-  const handleAddAlertSubmit = async () => {
-    if (!settings) {
-      window.alert('To get alerts on Telegram, you should set your Telegram chat ID in settings');
-      return;
-    }
+  const handleAddAlertSubmit = async (alertData) => {
     try {
       const alert = await createAlert({
         userEmail: user.email,
-        ticker: alertTicker,
-        condition: alertCondition,
-        alertPrice: parseFloat(alertPrice),
-        note: alertNote,
-        telegramChatId: settings.telegramChatId,
+        ...alertData,
       });
       if (alert.success) {
         setAddAlertDialogOpen(false);
@@ -286,13 +368,6 @@ const WatchListLayout = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [chartLayouts.length]);
-
-  const unsentAlertsCount = alerts.filter(
-    (alert) => alert.triggerNotificationStatus === 'Not Sent'
-  ).length;
-
-  const sentAlerts = alerts.filter((alert) => alert.triggerNotificationStatus !== 'Not Sent');
-  const unsentAlerts = alerts.filter((alert) => alert.triggerNotificationStatus === 'Not Sent');
 
   const calculatePercentDiff = (alertPrice, dayLow) => {
     if (!dayLow || !alertPrice) return null;
@@ -630,69 +705,7 @@ const WatchListLayout = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Add Alert Dialog */}
-      <Dialog open={addAlertDialogOpen} onClose={() => setAddAlertDialogOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
-          Add Alert
-        </DialogTitle>
-        <DialogContent className="flex flex-col gap-3 pt-6">
-          <TextField
-            label="Stock"
-            value={alertTicker}
-            onChange={(e) => setAlertTicker(e.target.value.toUpperCase())}
-            fullWidth
-            autoFocus
-            variant="outlined"
-          />
-          <FormControl fullWidth>
-            <InputLabel>Condition</InputLabel>
-            <Select
-              value={alertCondition}
-              label="Condition"
-              onChange={(e) => setAlertCondition(e.target.value)}
-              variant="outlined"
-            >
-              <MenuItem value="Above">Above</MenuItem>
-              <MenuItem value="Below">Below</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Alert Price"
-            type="number"
-            value={alertPrice}
-            onChange={(e) => setAlertPrice(e.target.value)}
-            fullWidth
-            variant="outlined"
-          />
-          <TextField
-            label="Note"
-            value={alertNote}
-            onChange={(e) => setAlertNote(e.target.value)}
-            fullWidth
-            multiline
-            rows={2}
-            variant="outlined"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setAddAlertDialogOpen(false)}
-            sx={{ textTransform: 'none' }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddAlertSubmit}
-            variant="contained"
-            disabled={!alertTicker || !alertPrice}
-            sx={{ textTransform: 'none', borderRadius: 20 }}
-          >
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* View Alerts Dialog */}
+      Te  {/* View Alerts Dialog */}
       <Dialog open={viewAlertsDialogOpen} onClose={() => setViewAlertsDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
           Alerts for {selectedSymbol}
@@ -773,8 +786,25 @@ const WatchListLayout = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Add Alert Dialog */}
+      <AddAlertDialog
+        open={addAlertDialogOpen}
+        onClose={() => setAddAlertDialogOpen(false)}
+        onSubmit={handleAddAlertSubmit}
+        initialTicker={selectedSymbol}
+      />
     </Box>
   );
 };
+
+// Memoize StockChart to prevent unnecessary re-renders
+const MemoizedStockChart = memo(StockChart, (prevProps, nextProps) => {
+  return (
+    prevProps.ticker === nextProps.ticker &&
+    prevProps.timeFrame === nextProps.timeFrame &&
+    prevProps.alerts === nextProps.alerts
+  );
+});
 
 export default WatchListLayout;

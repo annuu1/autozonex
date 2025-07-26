@@ -20,7 +20,7 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null, alerts = []
         textColor: 'black',
       },
       width: chartContainerRef.current.clientWidth,
-      height: 500,
+      height: 400,
       grid: {
         vertLines: { color: '#e0e0e0' },
         horzLines: { color: '#e0e0e0' },
@@ -144,7 +144,7 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null, alerts = []
 
   return (
     <div className="relative w-full">
-      <div ref={chartContainerRef} className="w-full h-[500px]" />
+      <div ref={chartContainerRef} className="w-full h-[400px]" />
     </div>
   );
 };

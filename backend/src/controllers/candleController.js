@@ -27,7 +27,7 @@ const getCandles = async (req, res) => {
     // Calculate date range (1 year ago to now)
     const period2 = new Date();
     const period1 = new Date(period2);
-    period1.setFullYear(period2.getFullYear() - 1);
+    period1.setFullYear(period2.getFullYear() - 15);
 
     // Fetch historical data
     const candles = await retry(() =>

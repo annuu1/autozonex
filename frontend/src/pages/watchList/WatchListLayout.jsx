@@ -322,7 +322,7 @@ const WatchListLayout = () => {
           </Box>
         </Paper>
         {/* Symbol Details */}
-        <Box className="flex-1 p-6 overflow-y-auto">
+        <Box className="flex-1 p-0 overflow-y-auto">
           {selectedSymbol ? (
             <Box
               ref={fullscreenRef}

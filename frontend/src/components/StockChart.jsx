@@ -2,10 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { fetchZones, fetchCandles } from '../services/api';
 
-const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
+const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null, alerts = [] }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
+  const priceLinesRef = useRef([]);
 
   useEffect(() => {
     const symbol = ticker.toUpperCase().endsWith('.NS') ? ticker.toUpperCase() : `${ticker.toUpperCase()}.NS`;
@@ -19,7 +20,7 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
         textColor: 'black',
       },
       width: chartContainerRef.current.clientWidth,
-      height: 400, // Increased height for larger appearance
+      height: 500,
       grid: {
         vertLines: { color: '#e0e0e0' },
         horzLines: { color: '#e0e0e0' },
@@ -51,10 +52,12 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
 
     const loadChartData = async () => {
       try {
+        // Fetch candles
         const candles = await fetchCandles(symbol, timeFrame);
         console.log('Fetched candles:', candles);
         candlestickSeries.setData(candles);
 
+        // Add price lines for zones
         if (selectedZone) {
           candlestickSeries.createPriceLine({
             price: selectedZone.proximalLine,
@@ -62,7 +65,7 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `(${selectedZone.pattern})`,
+            title: `Proximal (${selectedZone.pattern})`,
           });
           candlestickSeries.createPriceLine({
             price: selectedZone.distalLine,
@@ -70,31 +73,50 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
             lineWidth: 2,
             lineStyle: 0,
             axisLabelVisible: true,
-            title: `(${selectedZone.pattern})`,
+            title: `Distal (${selectedZone.pattern})`,
           });
         } else {
-          const fetchedZones = await fetchZones(ticker, timeFrame);
-          fetchedZones.forEach(zone => {
-            if (zone.freshness > 0) {
-              candlestickSeries.createPriceLine({
-                price: zone.proximalLine,
-                color: 'rgba(0, 150, 136, 0.5)',
-                lineWidth: 2,
-                lineStyle: 0,
-                axisLabelVisible: true,
-                title: `P (${zone.pattern})`,
-              });
-              candlestickSeries.createPriceLine({
-                price: zone.distalLine,
-                color: 'rgba(0, 150, 136, 0.5)',
-                lineWidth: 2,
-                lineStyle: 0,
-                axisLabelVisible: true,
-                title: `D (${zone.pattern})`,
-              });
-            }
-          });
+          try {
+            const fetchedZones = await fetchZones(ticker, timeFrame);
+            fetchedZones.forEach((zone) => {
+              if (zone.freshness > 0) {
+                candlestickSeries.createPriceLine({
+                  price: zone.proximalLine,
+                  color: 'rgba(0, 150, 136, 0.5)',
+                  lineWidth: 2,
+                  lineStyle: 0,
+                  axisLabelVisible: true,
+                  title: `P (${zone.pattern})`,
+                });
+                candlestickSeries.createPriceLine({
+                  price: zone.distalLine,
+                  color: 'rgba(0, 150, 136, 0.5)',
+                  lineWidth: 2,
+                  lineStyle: 0,
+                  axisLabelVisible: true,
+                  title: `D (${zone.pattern})`,
+                });
+              }
+            });
+          } catch (zoneError) {
+            console.error('Failed to fetch zones:', zoneError);
+          }
         }
+
+        // Add price lines for unsent alerts
+        alerts
+          .filter((alert) => alert.triggerNotificationStatus === 'Not Sent')
+          .forEach((alert, index) => {
+            const priceLine = candlestickSeries.createPriceLine({
+              price: alert.alertPrice,
+              color: alert.condition === 'Above' ? '#4caf50' : '#f44336',
+              lineWidth: 1,
+              lineStyle: 0, // Dashed line to differentiate from zones
+              axisLabelVisible: true,
+              title: `${alert.condition} ${alert.alertPrice}`,
+            });
+            priceLinesRef.current.push(priceLine);
+          });
 
         chart.timeScale().fitContent();
       } catch (error) {
@@ -107,13 +129,22 @@ const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
     return () => {
       console.log('Cleaning up chart');
       window.removeEventListener('resize', handleResize);
+      // Remove price lines
+      priceLinesRef.current.forEach((priceLine) => {
+        try {
+          candlestickSeries.removePriceLine(priceLine);
+        } catch (err) {
+          console.error('Error removing price line:', err);
+        }
+      });
+      priceLinesRef.current = [];
       chart.remove();
     };
-  }, [ticker, timeFrame, selectedZone]);
+  }, [ticker, timeFrame, selectedZone, alerts]);
 
   return (
     <div className="relative w-full">
-      <div ref={chartContainerRef} className="w-full h-[400px]" />
+      <div ref={chartContainerRef} className="w-full h-[500px]" />
     </div>
   );
 };

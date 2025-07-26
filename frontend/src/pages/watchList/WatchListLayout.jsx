@@ -86,6 +86,7 @@ const WatchListLayout = () => {
   const [viewAlertsDialogOpen, setViewAlertsDialogOpen] = useState(false);
   const [alerts, setAlerts] = useState([]);
   const [alertTabValue, setAlertTabValue] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
   const { user } = useAuth();
   const { settings } = useSettings();
 
@@ -100,6 +101,8 @@ const WatchListLayout = () => {
       const data = await getWatchLists();
       setWatchLists(data || []);
     } catch (err) {
+      console.error('Failed to fetch watchlists:', err);
+      setErrorMessage('Failed to load watchlists. Please try again.');
       setWatchLists([]);
     }
   };
@@ -114,6 +117,8 @@ const WatchListLayout = () => {
       );
       setAlerts(symbolAlerts);
     } catch (err) {
+      console.error('Failed to fetch alerts:', err);
+      setErrorMessage('Failed to load alerts. Please try again.');
       setAlerts([]);
     }
   };
@@ -133,15 +138,20 @@ const WatchListLayout = () => {
 
   const handleTabChange = (event, newValue) => {
     setSelectedWatchListIdx(newValue);
+    setErrorMessage(''); // Clear error on tab change
   };
 
   const handleSymbolSelect = (idx) => {
     setSelectedSymbolIdx(idx);
+    setErrorMessage(''); // Clear error on symbol select
   };
 
   // Add Watchlist
   const handleAddWatchList = async () => {
-    if (!newWatchListName.trim()) return;
+    if (!newWatchListName.trim()) {
+      setErrorMessage('Watchlist name cannot be empty.');
+      return;
+    }
     const symbols = newWatchListSymbols
       .split(',')
       .map((s) => s.trim().toUpperCase())
@@ -151,15 +161,20 @@ const WatchListLayout = () => {
       setAddDialogOpen(false);
       setNewWatchListName('');
       setNewWatchListSymbols('');
+      setErrorMessage('');
       fetchWatchLists();
     } catch (err) {
-      // Optionally handle error
+      console.error('Failed to create watchlist:', err);
+      setErrorMessage('Failed to create watchlist. Please try again.');
     }
   };
 
   // Edit Watchlist
   const handleEditWatchList = async () => {
-    if (!editName.trim()) return;
+    if (!editName.trim()) {
+      setErrorMessage('Watchlist name cannot be empty.');
+      return;
+    }
     const symbols = editSymbols
       .split(',')
       .map((s) => s.trim().toUpperCase())
@@ -171,9 +186,11 @@ const WatchListLayout = () => {
       });
       setEditDialogOpen(false);
       setEditWatchList(null);
+      setErrorMessage('');
       fetchWatchLists();
     } catch (err) {
-      // Optionally handle error
+      console.error('Failed to update watchlist:', err);
+      setErrorMessage('Failed to update watchlist. Please try again.');
     }
   };
 
@@ -182,7 +199,10 @@ const WatchListLayout = () => {
     e.preventDefault();
     setSymbolAddError('');
     const symbol = symbolInput.trim().toUpperCase();
-    if (!symbol) return;
+    if (!symbol) {
+      setSymbolAddError('Symbol cannot be empty.');
+      return;
+    }
     if (selectedWatchList.symbols.includes(symbol)) {
       setSymbolAddError('Symbol already exists in this watchlist.');
       return;
@@ -193,9 +213,11 @@ const WatchListLayout = () => {
         symbol
       );
       setSymbolInput('');
+      setErrorMessage('');
       fetchWatchLists();
     } catch (err) {
-      setSymbolAddError('Failed to add symbol.');
+      console.error('Failed to add symbol:', err);
+      setSymbolAddError('Failed to add symbol. Please try again.');
     }
   };
 
@@ -206,6 +228,7 @@ const WatchListLayout = () => {
     setAlertPrice('');
     setAlertNote('');
     setAddAlertDialogOpen(true);
+    setErrorMessage('');
   };
 
   const handleAddAlertSubmit = async () => {
@@ -224,12 +247,14 @@ const WatchListLayout = () => {
       });
       if (alert.success) {
         setAddAlertDialogOpen(false);
+        setErrorMessage('');
         fetchAlerts(); // Refresh alerts after adding
       } else {
-        window.alert(alert.message);
+        setErrorMessage(alert.message || 'Failed to create alert.');
       }
     } catch (err) {
-      window.alert('Failed to create alert.');
+      console.error('Failed to create alert:', err);
+      setErrorMessage('Failed to create alert. Please try again.');
     }
   };
 
@@ -237,6 +262,7 @@ const WatchListLayout = () => {
   const handleViewAlerts = () => {
     setAlertTabValue(0);
     setViewAlertsDialogOpen(true);
+    setErrorMessage('');
   };
 
   // Toggle fullscreen
@@ -276,6 +302,12 @@ const WatchListLayout = () => {
 
   return (
     <Box className="flex flex-col h-full min-h-[400px] rounded-lg overflow-hidden border border-gray-200 bg-white">
+      {/* Error Message */}
+      {errorMessage && (
+        <Typography color="error" variant="body2" className="px-4 py-2 text-center">
+          {errorMessage}
+        </Typography>
+      )}
       {/* Tabs for Watchlists */}
       <Paper
         elevation={0}
@@ -312,9 +344,15 @@ const WatchListLayout = () => {
                         onClick={async (e) => {
                           e.stopPropagation();
                           if (window.confirm('Delete this watchlist?')) {
-                            await deleteWatchList(wl._id || wl.id);
-                            setSelectedWatchListIdx(0);
-                            fetchWatchLists();
+                            try {
+                              await deleteWatchList(wl._id || wl.id);
+                              setSelectedWatchListIdx(0);
+                              setErrorMessage('');
+                              fetchWatchLists();
+                            } catch (err) {
+                              console.error('Failed to delete watchlist:', err);
+                              setErrorMessage('Failed to delete watchlist. Please try again.');
+                            }
                           }
                         }}
                       >
@@ -386,11 +424,17 @@ const WatchListLayout = () => {
                       <IconButton
                         edge="end"
                         onClick={async () => {
-                          await removeSymbolFromWatchList(
-                            selectedWatchList._id || selectedWatchList.id,
-                            symbol
-                          );
-                          fetchWatchLists();
+                          try {
+                            await removeSymbolFromWatchList(
+                              selectedWatchList._id || selectedWatchList.id,
+                              symbol
+                            );
+                            setErrorMessage('');
+                            fetchWatchLists();
+                          } catch (err) {
+                            console.error('Failed to remove symbol:', err);
+                            setSymbolAddError('Failed to remove symbol. Please try again.');
+                          }
                         }}
                       >
                         <DeleteIcon fontSize="small" />
@@ -499,22 +543,22 @@ const WatchListLayout = () => {
                 {chartLayouts[currentChartLayoutIndex] === 'default' && (
                   <>
                     <Box className="w-full">
-                      <StockChart ticker={selectedSymbol} timeFrame="1d" />
+                      <StockChart ticker={selectedSymbol} timeFrame="1d" alerts={unsentAlerts} />
                     </Box>
                     <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <StockChart ticker={selectedSymbol} timeFrame="1wk" />
-                      <StockChart ticker={selectedSymbol} timeFrame="1mo" />
+                      <StockChart ticker={selectedSymbol} timeFrame="1wk" alerts={unsentAlerts} />
+                      <StockChart ticker={selectedSymbol} timeFrame="1mo" alerts={unsentAlerts} />
                     </Box>
                   </>
                 )}
                 {chartLayouts[currentChartLayoutIndex] === 'allTimeframes' && (
                   <>
                     <Box className="w-full">
-                      <StockChart ticker={selectedSymbol} timeFrame="60m" />
+                      <StockChart ticker={selectedSymbol} timeFrame="60m" alerts={unsentAlerts} />
                     </Box>
                     <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <StockChart ticker={selectedSymbol} timeFrame="5m" />
-                      <StockChart ticker={selectedSymbol} timeFrame="15m" />
+                      <StockChart ticker={selectedSymbol} timeFrame="5m" alerts={unsentAlerts} />
+                      <StockChart ticker={selectedSymbol} timeFrame="15m" alerts={unsentAlerts} />
                     </Box>
                   </>
                 )}

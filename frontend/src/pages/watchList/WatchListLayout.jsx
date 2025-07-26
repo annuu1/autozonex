@@ -18,12 +18,20 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import { createAlert, getAlerts } from '../../api/alert';
+import { useAuth } from '../../hooks/useAuth';
+import { useSettings } from '../../hooks/useSettings';
 
 // API functions
 import {
@@ -52,6 +60,13 @@ const WatchListLayout = () => {
   const chartLayouts = ['default', 'allTimeframes'];
   const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
   const fullscreenRef = useRef(null);
+  const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
+  const [alertTicker, setAlertTicker] = useState('');
+  const [alertCondition, setAlertCondition] = useState('Above');
+  const [alertPrice, setAlertPrice] = useState('');
+  const [alertNote, setAlertNote] = useState('');
+  const { user } = useAuth();
+  const { settings } = useSettings();
 
   // Fetch watchlists
   const fetchWatchLists = async () => {
@@ -141,6 +156,39 @@ const WatchListLayout = () => {
     }
   };
 
+  // Add Alert
+  const handleAddAlert = () => {
+    setAlertTicker(selectedSymbol || '');
+    setAlertCondition('Above');
+    setAlertPrice('');
+    setAlertNote('');
+    setAddAlertDialogOpen(true);
+  };
+
+  const handleAddAlertSubmit = async () => {
+    if (!settings) {
+      window.alert('To get alerts on Telegram, you should set your Telegram chat ID in settings');
+      return;
+    }
+    try {
+      const alert = await createAlert({
+        userEmail: user.email,
+        ticker: alertTicker,
+        condition: alertCondition,
+        alertPrice: parseFloat(alertPrice),
+        note: alertNote,
+        telegramChatId: settings.telegramChatId,
+      });
+      if (alert.success) {
+        setAddAlertDialogOpen(false);
+      } else {
+        window.alert(alert.message);
+      }
+    } catch (err) {
+      window.alert('Failed to create alert.');
+    }
+  };
+
   const selectedWatchList = watchLists[selectedWatchListIdx] || {};
   const symbols = selectedWatchList.symbols || [];
   const selectedSymbol = symbols[selectedSymbolIdx] || null;
@@ -227,6 +275,7 @@ const WatchListLayout = () => {
           startIcon={<AddIcon />}
           onClick={() => setAddDialogOpen(true)}
           size="small"
+          sx={{ textTransform: 'none', borderRadius: 20 }}
         >
           New
         </Button>
@@ -333,9 +382,28 @@ const WatchListLayout = () => {
                 <Typography variant="h5">{selectedSymbol} ({
                   chartLayouts[currentChartLayoutIndex] === 'allTimeframes' ? '60m, 5m, 15m' : '1d, 1wk, 1mo'
                 })</Typography>
-                <IconButton onClick={toggleFullscreen}>
-                  {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-                </IconButton>
+                <Box className="flex gap-2">
+                  <Button
+                    variant="contained"
+                    startIcon={<NotificationsActiveIcon sx={{ fontSize: 16 }} />}
+                    onClick={handleAddAlert}
+                    size="small"
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: 20,
+                      fontSize: '0.625rem',
+                      padding: '2px 8px',
+                      minWidth: 'auto',
+                      lineHeight: 1.2
+                    }}
+                    disabled={!selectedSymbol}
+                  >
+                    Add Alert
+                  </Button>
+                  <IconButton onClick={toggleFullscreen}>
+                    {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                  </IconButton>
+                </Box>
               </Box>
               <Divider className="mb-4" />
               <Box className="flex flex-col gap-4">
@@ -425,6 +493,68 @@ const WatchListLayout = () => {
           <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleEditWatchList} variant="contained">
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Alert Dialog */}
+      <Dialog open={addAlertDialogOpen} onClose={() => setAddAlertDialogOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
+          Add New Alert
+        </DialogTitle>
+        <DialogContent className="flex flex-col gap-4 pt-4">
+          <TextField
+            label="Ticker"
+            value={alertTicker}
+            onChange={(e) => setAlertTicker(e.target.value.toUpperCase())}
+            fullWidth
+            autoFocus
+            variant="outlined"
+          />
+          <FormControl fullWidth>
+            <InputLabel>Condition</InputLabel>
+            <Select
+              value={alertCondition}
+              label="Condition"
+              onChange={(e) => setAlertCondition(e.target.value)}
+              variant="outlined"
+            >
+              <MenuItem value="Above">Above</MenuItem>
+              <MenuItem value="Below">Below</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            label="Alert Price"
+            type="number"
+            value={alertPrice}
+            onChange={(e) => setAlertPrice(e.target.value)}
+            fullWidth
+            variant="outlined"
+          />
+          <TextField
+            label="Note"
+            value={alertNote}
+            onChange={(e) => setAlertNote(e.target.value)}
+            fullWidth
+            multiline
+            minRows={2}
+            variant="outlined"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setAddAlertDialogOpen(false)}
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAddAlertSubmit}
+            variant="contained"
+            disabled={!alertTicker || !alertPrice}
+            sx={{ textTransform: 'none', borderRadius: 20 }}
+          >
+            Add
           </Button>
         </DialogActions>
       </Dialog>

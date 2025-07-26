@@ -385,14 +385,13 @@ const WatchListLayout = () => {
                 <Box className="flex gap-2">
                   <Button
                     variant="contained"
-                    startIcon={<NotificationsActiveIcon sx={{ fontSize: 16 }} />}
+                    startIcon={<NotificationsActiveIcon sx={{ fontSize: 12 }} />}
                     onClick={handleAddAlert}
                     size="small"
                     sx={{
                       textTransform: 'none',
                       borderRadius: 20,
-                      fontSize: '0.625rem',
-                      padding: '2px 8px',
+                      padding: '0px 16px',
                       minWidth: 'auto',
                       lineHeight: 1.2
                     }}

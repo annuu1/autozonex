@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { createChart, ColorType, CandlestickSeries } from 'lightweight-charts';
 import { fetchZones, fetchCandles } from '../services/api';
 
-const StockChart = ({ ticker, timeFrame='1d', selectedZone = null }) => {
+const StockChart = ({ ticker, timeFrame = '1d', selectedZone = null }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
   const candlestickSeriesRef = useRef(null);
@@ -19,7 +19,7 @@ const StockChart = ({ ticker, timeFrame='1d', selectedZone = null }) => {
         textColor: 'black',
       },
       width: chartContainerRef.current.clientWidth,
-      height: 400,
+      height: 400, // Increased height for larger appearance
       grid: {
         vertLines: { color: '#e0e0e0' },
         horzLines: { color: '#e0e0e0' },
@@ -51,16 +51,11 @@ const StockChart = ({ ticker, timeFrame='1d', selectedZone = null }) => {
 
     const loadChartData = async () => {
       try {
-        // ✅ Fetch candles dynamically
         const candles = await fetchCandles(symbol, timeFrame);
         console.log('Fetched candles:', candles);
-
-        // ✅ Set fetched candles on chart
         candlestickSeries.setData(candles);
 
-        // ✅ Fetch zones and draw them
         if (selectedZone) {
-
           candlestickSeries.createPriceLine({
             price: selectedZone.proximalLine,
             color: 'rgba(0, 150, 136, 0.5)',
@@ -77,31 +72,28 @@ const StockChart = ({ ticker, timeFrame='1d', selectedZone = null }) => {
             axisLabelVisible: true,
             title: `(${selectedZone.pattern})`,
           });
-          
-        }else{
+        } else {
           const fetchedZones = await fetchZones(ticker, timeFrame);
-        // console.log('Fetched zones:', fetchedZones);
-
-        fetchedZones.forEach(zone => {
-          if(zone.freshness > 0){
-            candlestickSeries.createPriceLine({
-              price: zone.proximalLine,
-              color: 'rgba(0, 150, 136, 0.5)',
-              lineWidth: 2,
-              lineStyle: 0,
-              axisLabelVisible: true,
-              title: `P (${zone.pattern})`,
-            });
-            candlestickSeries.createPriceLine({
-              price: zone.distalLine,
-              color: 'rgba(0, 150, 136, 0.5)',
-              lineWidth: 2,
-              lineStyle: 0,
-              axisLabelVisible: true,
-              title: `D (${zone.pattern})`,
-            });
-          }
-        });
+          fetchedZones.forEach(zone => {
+            if (zone.freshness > 0) {
+              candlestickSeries.createPriceLine({
+                price: zone.proximalLine,
+                color: 'rgba(0, 150, 136, 0.5)',
+                lineWidth: 2,
+                lineStyle: 0,
+                axisLabelVisible: true,
+                title: `P (${zone.pattern})`,
+              });
+              candlestickSeries.createPriceLine({
+                price: zone.distalLine,
+                color: 'rgba(0, 150, 136, 0.5)',
+                lineWidth: 2,
+                lineStyle: 0,
+                axisLabelVisible: true,
+                title: `D (${zone.pattern})`,
+              });
+            }
+          });
         }
 
         chart.timeScale().fitContent();

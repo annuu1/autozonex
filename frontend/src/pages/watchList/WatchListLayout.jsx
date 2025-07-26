@@ -22,6 +22,8 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 // API functions
 import {
@@ -32,9 +34,6 @@ import {
   deleteWatchList,
   updateWatchList,
 } from '../../api/watchList';
-
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 const WatchListLayout = () => {
   const [watchLists, setWatchLists] = useState([]);
@@ -49,7 +48,6 @@ const WatchListLayout = () => {
   const [editSymbols, setEditSymbols] = useState('');
   const [symbolInput, setSymbolInput] = useState('');
   const [symbolAddError, setSymbolAddError] = useState('');
-
   const [isFullscreen, setIsFullscreen] = useState(false);
   const chartLayouts = ['default', 'allTimeframes'];
   const [currentChartLayoutIndex, setCurrentChartLayoutIndex] = useState(0);
@@ -147,7 +145,7 @@ const WatchListLayout = () => {
   const symbols = selectedWatchList.symbols || [];
   const selectedSymbol = symbols[selectedSymbolIdx] || null;
 
-  //toggle fullscreen
+  // Toggle fullscreen
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       fullscreenRef.current.requestFullscreen();
@@ -157,10 +155,9 @@ const WatchListLayout = () => {
       setIsFullscreen(false);
     }
   };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Removed 'f' key binding for fullscreen
-      // New 'l' key binding for toggling chart layouts
       if (e.key === 'D' || e.key === 'C') {
         e.preventDefault();
         setCurrentChartLayoutIndex((prevIndex) => (prevIndex + 1) % chartLayouts.length);
@@ -322,47 +319,49 @@ const WatchListLayout = () => {
           </Box>
         </Paper>
         {/* Symbol Details */}
-        <Box className="flex-1 p-0 overflow-y-auto">
+        <Box className="flex-1 p-4 overflow-y-auto">
           {selectedSymbol ? (
             <Box
               ref={fullscreenRef}
-              className={`relative ${
+              className={`relative w-full ${
                 isFullscreen
                   ? 'fixed inset-0 bg-white z-50 p-6 overflow-auto'
-                  : 'max-w-6xl mx-auto w-full'
+                  : 'w-full'
               }`}
             >
-              <Box className="flex justify-between items-center">
+              <Box className="flex justify-between items-center mb-4">
                 <Typography variant="h5">{selectedSymbol} ({
-                  chartLayouts[currentChartLayoutIndex] === 'allTimeframes'? '60m, 5m, 15m': '1d, 1wk, 1mo'
-                  })</Typography>
+                  chartLayouts[currentChartLayoutIndex] === 'allTimeframes' ? '60m, 5m, 15m' : '1d, 1wk, 1mo'
+                })</Typography>
                 <IconButton onClick={toggleFullscreen}>
                   {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
                 </IconButton>
               </Box>
               <Divider className="mb-4" />
-              <div>
+              <Box className="flex flex-col gap-4">
                 {chartLayouts[currentChartLayoutIndex] === 'default' && (
                   <>
-                    <div>
-                      <StockChart ticker={selectedSymbol} />
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-4 mt-6">
+                    <Box className="w-full">
+                      <StockChart ticker={selectedSymbol} timeFrame="1d" />
+                    </Box>
+                    <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <StockChart ticker={selectedSymbol} timeFrame="1wk" />
                       <StockChart ticker={selectedSymbol} timeFrame="1mo" />
-                    </div>
+                    </Box>
                   </>
                 )}
                 {chartLayouts[currentChartLayoutIndex] === 'allTimeframes' && (
                   <>
-                  <StockChart ticker={selectedSymbol} timeFrame="60m" />
-                  <div className="flex flex-col md:flex-row gap-4 mt-6">
-                    <StockChart ticker={selectedSymbol} timeFrame="5m" />
-                    <StockChart ticker={selectedSymbol} timeFrame="15m" />
-                  </div>
+                    <Box className="w-full">
+                      <StockChart ticker={selectedSymbol} timeFrame="60m" />
+                    </Box>
+                    <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <StockChart ticker={selectedSymbol} timeFrame="5m" />
+                      <StockChart ticker={selectedSymbol} timeFrame="15m" />
+                    </Box>
                   </>
                 )}
-              </div>
+              </Box>
             </Box>
           ) : (
             <Typography className="text-gray-400">
